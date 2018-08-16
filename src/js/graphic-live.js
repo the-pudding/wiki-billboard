@@ -1,7 +1,3 @@
-import {
-	setTimeout
-} from "timers";
-
 let cleanedData;
 let nestedData;
 let currentDay;
@@ -11,7 +7,8 @@ const $rankList = $section.select('ul.live__ranking')
 
 function parseDate(date) {
 	const dates = date.split('-')
-		.map(d => +d)
+		.map(d => +d);
+
 	return new Date(dates[0], dates[1] - 1, dates[2])
 }
 
@@ -51,7 +48,7 @@ function loadData() {
 }
 
 
-function createDOMElements() {}
+
 
 function updateChart() {
 	const data = nestedData[currentDay]
@@ -60,9 +57,13 @@ function updateChart() {
 		.selectAll('li.person')
 		.data(data.values, d => d.article)
 
+	$li
+		.st('color', 'pink')
+
 	// First step: enter new items
 
-	const $enteredLi = $li.enter()
+	const $enteredLi = $li
+		.enter()
 		.append('li.person')
 		.text(d => d.article)
 
@@ -70,8 +71,9 @@ function updateChart() {
 	// Second step: exit old items
 
 	$li.exit()
+		.transition()
+		.st('opacity', 0)
 		.remove()
-
 
 	// Third step: update pre-existing items
 
@@ -98,7 +100,7 @@ function init() {
 			setInterval(() => {
 				currentDay += 1
 				updateChart()
-			}, 1000)
+			}, 2000)
 		})
 		.catch(console.log)
 }
