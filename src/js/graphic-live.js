@@ -1,8 +1,11 @@
+/* global d3 */
+
 let cleanedData;
 let nestedData;
 let currentDay;
 
 const $section = d3.select('#live')
+const $dayCounter = $section.select('div.live__date-counter')
 const $rankList = $section.select('ul.live__ranking')
 
 function parseDate(date) {
@@ -52,31 +55,39 @@ function loadData() {
 
 function updateChart() {
 	const data = nestedData[currentDay]
+	const dateForCounter = data.values[0]['date'].toDateString().split(' ')
+
+	$dayCounter.text(dateForCounter[0] + ' ' + dateForCounter[1] + ' ' + dateForCounter[2] + ' ' + dateForCounter[3])
+
+	// Select pre-existing items
 
 	const $li = $rankList
 		.selectAll('li.person')
 		.data(data.values, d => d.article)
 
 	$li
-		.st('color', 'pink')
+		.transition()
+		.delay(200)
+		.st('top', d => d.rank_people * 20)
 
-	// First step: enter new items
+
+	// Enter new items
 
 	const $enteredLi = $li
 		.enter()
 		.append('li.person')
-		.text(d => d.article)
+		.st('right', (-2000))
+		.text(d => (d.rank_people + 1) + ' ' + d.article.replace(/_/g, ' '))
 
 
-	// Second step: exit old items
+	// Exit old items
 
 	$li.exit()
 		.transition()
+		.duration(500)
+		.st('top', 1000)
 		.st('opacity', 0)
 		.remove()
-
-	// Third step: update pre-existing items
-
 
 	// Fourth step: update all current items
 
@@ -85,9 +96,10 @@ function updateChart() {
 
 	$mergedLi
 		.transition()
+		.duration(500)
 		.st('top', d => d.rank_people * 20)
-
-
+		.text(d => (d.rank_people + 1) + '. ' + d.article.replace(/_/g, ' '))
+		.st('right', )
 }
 
 function resize() {}
@@ -98,9 +110,13 @@ function init() {
 		.then(() => {
 			updateChart();
 			setInterval(() => {
-				currentDay += 1
-				updateChart()
-			}, 2000)
+				if (currentDay < nestedData.length - 1) {
+					currentDay += 1
+					updateChart()
+				} else {
+					clearInterval()
+				}
+			}, 3000)
 		})
 		.catch(console.log)
 }
