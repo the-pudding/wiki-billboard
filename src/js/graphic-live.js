@@ -55,6 +55,7 @@ function loadData() {
 }
 
 function updateChart() {
+
 	const data = nestedData[currentDay];
 	const dateForCounter = data.date.toString().substring(0, 16);
 
@@ -66,45 +67,108 @@ function updateChart() {
 		.selectAll('li.person')
 		.data(data.values, d => d.article);
 
-	$li
-		.transition()
-		.delay(200) // TODO
-		.st('top', d => d.rank_people * personHeight);
 
-	// Enter new items
 
-	const $enteredLi = $li
-		.enter()
-		.append('li.person')
-		.st('left', '100%');
+	const mergeTransition = ($enteredLi) => {
 
-	// Exit old items
+		console.log('merge transition')
+		const $mergedLi = $enteredLi.merge($li);
 
-	$li
-		.exit()
-		.transition()
-		.duration(500) // TODO
-		.st('top', 1000) // TODO
-		.st('opacity', 0)
-		.remove();
+		$mergedLi
+			.text(d => `${d.rank_people + 1}. ${d.name}`)
+			.transition()
+			.duration(500) // TODO
+			.st('top', d => d.rank_people * personHeight)
+			.st('left', '50%');
 
-	// Fourth step: update all current items
+	}
 
-	const $mergedLi = $enteredLi.merge($li);
+	const enterTransition = () => {
+		console.log('enter transition')
 
-	$mergedLi
-		.text(d => `${d.rank_people + 1}. ${d.name}`)
-		.transition()
-		.duration(500) // TODO
-		.st('top', d => d.rank_people * personHeight)
-		.st('left', '0%');
+		const $enteredLi = $li
+			.enter()
+			.append('li.person')
+
+		$enteredLi
+			.st('left', '100%')
+			.st('top', d => d.rank_people * personHeight)
+
+		mergeTransition($enteredLi)
+
+
+	}
+
+	const updateTransition = () => {
+
+		console.log('update transition')
+		let updateDone = false;
+
+		if ($li.size() === 0) {
+			enterTransition()
+		} else {
+			$li
+				.transition()
+				.delay(200) // TODO
+				.st('top', d => d.rank_people * personHeight)
+				.on('end', () => {
+					if (!updateDone) enterTransition()
+					updateDone = true;
+				});
+		}
+
+	}
+
+	const exitTransition = () => {
+
+		console.log('exit transition')
+		let exitDone = false;
+
+		const $liExit = $li
+			.exit()
+
+		if ($liExit.size() === 0) {
+			updateTransition()
+		} else {
+			$liExit
+				.transition()
+				.duration(500) // TODO
+				.st('left', '0%') // TODO
+				.st('opacity', 0)
+				.on('end', () => {
+					if (!exitDone) updateTransition()
+					exitDone = true;
+				})
+				.remove();
+		}
+	}
+
+
+
+	exitTransition()
+
+
+
+
+
+	// Updating current items
+
+
+
+
+
+
+	// Update all current items
+
 }
 
 function resize() {
 	// update height of ul
 	personHeight = 20;
 	const height = NUM_PEOPLE * personHeight;
-	$rankList.st({ height });
+	$rankList.st({
+		height
+	});
 }
 
 function init() {
