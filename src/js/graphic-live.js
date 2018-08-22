@@ -7,6 +7,8 @@ let cleanedData = [];
 let nestedData = [];
 let currentDay = 0;
 let personHeight = 0;
+let timer = null;
+let autoplay = true;
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
@@ -14,7 +16,19 @@ const $rankList = $section.select('ul.live__ranking');
 const $sliderNode = d3.select('.live__slider').node();
 
 function handleSlide(value) {
-	const [index] = value
+
+	const [index] = value;
+
+	if (+index < nestedData.length - 1) {
+		currentDay = +index;
+		console.log(currentDay)
+		updateChart(true);
+		autoplay = false;
+	} else {
+		// change style of slider to show it's disabled
+		// keep slider updating to 
+	}
+
 
 }
 
@@ -89,7 +103,20 @@ function loadData() {
 	});
 }
 
-function updateChart() {
+function finishTransition() {
+
+	timer = d3.timeout(() => {
+
+		if (autoplay && currentDay < nestedData.length - 2) {
+			currentDay += 1;
+			$sliderNode.noUiSlider.set(currentDay)
+			updateChart();
+		}
+	}, 3000)
+}
+
+
+function updateChart(skip) {
 
 	const data = nestedData[currentDay];
 
@@ -107,12 +134,18 @@ function updateChart() {
 
 		const $mergedLi = $enteredLi.merge($li);
 
+		let mergedDone = false;
+
 		$mergedLi
 			.text(d => `${d.rank_people + 1}. ${d.name}`)
 			.transition()
-			.duration(500) // TODO
+			.duration(skip ? 0 : 500) // TODO
 			.st('top', d => d.rank_people * personHeight)
-			.st('left', '50%');
+			.st('left', '50%')
+			.on('end', () => {
+				if (!mergedDone) finishTransition()
+				mergedDone = true;
+			})
 
 	}
 
@@ -142,7 +175,8 @@ function updateChart() {
 		} else {
 			$li
 				.transition()
-				.delay((d, i) => d.rank_people * 200)
+				.delay((d, i) => skip ? 0 : d.rank_people * 200)
+				.duration(skip ? 0 : 500)
 				.st('top', d => d.rank_people * personHeight)
 				.on('end', () => {
 					updateCount += 1
@@ -164,7 +198,7 @@ function updateChart() {
 		} else {
 			$liExit
 				.transition()
-				.duration(1000) // TODO
+				.duration(skip ? 0 : 1000) // TODO
 				.ease(d3.easeCubicInOut)
 				.st('left', '0%') // TODO
 				.st('opacity', 0)
@@ -195,6 +229,12 @@ function updateChart() {
 
 }
 
+function setupTimer() {
+	timer = d3.timer((elapsed) => {
+		console.log(elapsed)
+	})
+}
+
 function resize() {
 	// update height of ul
 	personHeight = 20;
@@ -210,16 +250,10 @@ function init() {
 		.then(() => {
 			updateChart();
 			setupSlider()
+			// setupTimer()
 			// TODO update using d3 timer
-			setInterval(() => {
-				if (currentDay < nestedData.length - 1) {
-					currentDay += 1;
-					$sliderNode.noUiSlider.set(currentDay);
-					updateChart();
-				} else {
-					clearInterval();
-				}
-			}, 3000);
+			// setInterval(() => {		
+			// }, 5000);
 		})
 		.catch(console.log);
 }
