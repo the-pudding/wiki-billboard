@@ -1,5 +1,6 @@
 /* global d3 */
 import * as noUiSlider from 'nouislider';
+
 const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
 
@@ -15,41 +16,58 @@ const $dayCounter = $section.select('div.live__date-counter');
 const $rankList = $section.select('ul.live__ranking');
 const $sliderNode = d3.select('.live__slider').node();
 
-function handleSlide(value) {
+// function filter500( value, type ){
+// 	return value % 1000 ? 2 : 1;
+// }
 
+function handleSlide(value) {
 	const [index] = value;
 
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
-		console.log(currentDay)
+		console.log(currentDay);
 		updateChart(true);
 		autoplay = false;
 	} else {
 		// change style of slider to show it's disabled
-		// keep slider updating to 
+		// keep slider updating to
 	}
-
-
 }
 
 function setupSlider() {
-
 	const min = 0;
-	const max = 364;
-	const start = currentDay
-
-
+	const max = nestedData.length - 1;
+	const start = currentDay;
 
 	noUiSlider
 		.create($sliderNode, {
 			start,
 			step: 1,
-			tooltips: [{
-				to: value => {
+			pips: {
+				filter: value => {
 					const data = nestedData[Math.round(value)];
-					return data.dateDisplay;
+					return data.key.endsWith('01') ? 1 : 0;
+				},
+				mode: 'steps',
+				format: {
+					to: value => {
+						const data = nestedData[Math.round(value)];
+
+						if (data.key.endsWith('01')) {
+							console.log(data.dateDisplay.substring(4, 7));
+							return data.dateDisplay.substring(4, 7);
+						}
+					}
 				}
-			}],
+			},
+			tooltips: [
+				{
+					to: value => {
+						const data = nestedData[Math.round(value)];
+						return data.dateDisplay;
+					}
+				}
+			],
 			range: {
 				min,
 				max
@@ -57,7 +75,6 @@ function setupSlider() {
 		})
 		.on('slide', handleSlide);
 }
-
 
 function parseDate(date) {
 	const dates = date.split('-').map(d => +d);
@@ -72,15 +89,14 @@ function cleanData(data) {
 		rank_people: +person.rank_people,
 		views: +person.views,
 		dateString: person.date,
-		date: parseDate(person.date),
+		date: parseDate(person.date)
 	}));
 }
 
 function loadData() {
 	return new Promise((resolve, reject) => {
-		const timeStamped = Date.now()
-		const dataURL =
-			`https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;
+		const timeStamped = Date.now();
+		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;
 
 		d3.loadData(dataURL, (error, response) => {
 			if (error) reject(error);
@@ -93,9 +109,13 @@ function loadData() {
 					.entries(cleanedData)
 					.map(d => ({
 						...d,
-						dateDisplay: (parseDate(d.key)).toString().substring(0, 10)
+						dateDisplay: parseDate(d.key)
+							.toString()
+							.substring(0, 10)
 					}));
 				currentDay = nestedData.length - DAYS_TO_START;
+
+				console.log(nestedData);
 
 				resolve();
 			}
@@ -104,20 +124,16 @@ function loadData() {
 }
 
 function finishTransition() {
-
 	timer = d3.timeout(() => {
-
 		if (autoplay && currentDay < nestedData.length - 2) {
 			currentDay += 1;
-			$sliderNode.noUiSlider.set(currentDay)
+			$sliderNode.noUiSlider.set(currentDay);
 			updateChart();
 		}
-	}, 3000)
+	}, 3000);
 }
 
-
 function updateChart(skip) {
-
 	const data = nestedData[currentDay];
 
 	$dayCounter.text(data.dateDisplay);
@@ -128,10 +144,7 @@ function updateChart(skip) {
 		.selectAll('li.person')
 		.data(data.values, d => d.article);
 
-
-
-	const mergeTransition = ($enteredLi) => {
-
+	const mergeTransition = $enteredLi => {
 		const $mergedLi = $enteredLi.merge($li);
 
 		let mergedDone = false;
@@ -143,58 +156,46 @@ function updateChart(skip) {
 			.st('top', d => d.rank_people * personHeight)
 			.st('left', '50%')
 			.on('end', () => {
-				if (!mergedDone) finishTransition()
+				if (!mergedDone) finishTransition();
 				mergedDone = true;
-			})
-
-	}
+			});
+	};
 
 	const enterTransition = () => {
+		const $enteredLi = $li.enter().append('li.person');
 
-		const $enteredLi = $li
-			.enter()
-			.append('li.person')
+		$enteredLi.st('left', '100%').st('top', d => d.rank_people * personHeight);
 
-		$enteredLi
-			.st('left', '100%')
-			.st('top', d => d.rank_people * personHeight)
-
-		mergeTransition($enteredLi)
-
-
-	}
+		mergeTransition($enteredLi);
+	};
 
 	const updateTransition = () => {
-
 		let updateCount = 0;
 
 		const updateSize = $li.size();
 
 		if (updateSize === 0) {
-			enterTransition()
+			enterTransition();
 		} else {
 			$li
 				.transition()
-				.delay((d, i) => skip ? 0 : d.rank_people * 200)
+				.delay((d, i) => (skip ? 0 : d.rank_people * 200))
 				.duration(skip ? 0 : 500)
 				.st('top', d => d.rank_people * personHeight)
 				.on('end', () => {
-					updateCount += 1
-					if (updateCount === updateSize) enterTransition()
+					updateCount += 1;
+					if (updateCount === updateSize) enterTransition();
 				});
 		}
-
-	}
+	};
 
 	const exitTransition = () => {
-
 		let exitDone = false;
 
-		const $liExit = $li
-			.exit()
+		const $liExit = $li.exit();
 
 		if ($liExit.size() === 0) {
-			updateTransition()
+			updateTransition();
 		} else {
 			$liExit
 				.transition()
@@ -203,36 +204,24 @@ function updateChart(skip) {
 				.st('left', '0%') // TODO
 				.st('opacity', 0)
 				.on('end', () => {
-					if (!exitDone) updateTransition()
+					if (!exitDone) updateTransition();
 					exitDone = true;
 				})
 				.remove();
 		}
-	}
+	};
 
-
-
-	exitTransition()
-
-
-
-
+	exitTransition();
 
 	// Updating current items
 
-
-
-
-
-
 	// Update all current items
-
 }
 
 function setupTimer() {
-	timer = d3.timer((elapsed) => {
-		console.log(elapsed)
-	})
+	timer = d3.timer(elapsed => {
+		console.log(elapsed);
+	});
 }
 
 function resize() {
@@ -249,10 +238,10 @@ function init() {
 	loadData()
 		.then(() => {
 			updateChart();
-			setupSlider()
+			setupSlider();
 			// setupTimer()
 			// TODO update using d3 timer
-			// setInterval(() => {		
+			// setInterval(() => {
 			// }, 5000);
 		})
 		.catch(console.log);
