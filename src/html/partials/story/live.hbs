@@ -1,9 +1,16 @@
 <section id='live'>
-    <div class='live__nav-buttons'>
-        <div class='button-play'>PLAY/PAUSE</div>
-        <div class='button-fast'>FAST</div>
-    </div>
-    <div class='live__slider slider'></div>
-    <div class='live__date-counter'></div>
-    <ul class='live__ranking'></ul>
+	<nav class='live__nav'>
+		<fieldset>
+			<div class='autoplay'>
+				<button class='autoplay__toggle' alt='pause animation'>Pause</button>
+			</div>
+			<div class='speed'>
+				<button data-speed='4000' class='speed__slow is-selected' alt='slower animation'>Slow</button>
+				<button data-speed='1000' class='speed__fast' alt='faster animation'>Fast</button>
+			</div>
+		</fieldset>
+	</nav>
+	<div class='live__slider slider'></div>
+	<div class='live__date-counter'></div>
+	<ul class='live__ranking'></ul>
 </section>

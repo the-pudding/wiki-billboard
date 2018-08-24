@@ -10,36 +10,38 @@ let currentDay = 0;
 let personHeight = 0;
 let timer = null;
 let autoplay = true;
-let transitionTime = 4000
+let transitionDuration = 4000;
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
 const $rankList = $section.select('ul.live__ranking');
-const $sliderNode = d3.select('.live__slider').node();
-const $playButton = d3.select('.button-play');
-const $fastButton = d3.select('.button-fast');
+const $sliderNode = $section.select('.live__slider').node();
+const $nav = $section.select('nav');
+const $autoplayButton = $nav.select('.autoplay__toggle');
+const $speedButtons = $nav.selectAll('.speed button');
+const $fastButton = $nav.select('.speed__fast');
+const $slowButton = $nav.select('.speed__slow');
 
-// function filter500( value, type ){
-// 	return value % 1000 ? 2 : 1;
-// }
-
-function setupPlayButton() {
-	$playButton
-		.on('click', () => {
-			autoplay = (autoplay === true) ? false : true;
-			if (autoplay) {
-				updateChart()
-			}
-		})
+function handleSpeedToggle() {
+	const $btn = d3.select(this);
+	transitionDuration = +$btn.at('data-speed');
+	$speedButtons.classed('is-selected', false);
+	$btn.classed('is-selected', true);
 }
 
+function handleAutoplayToggle() {
+	// autoplay = (autoplay === true) ? false : true;
+	autoplay = !autoplay;
+	$autoplayButton
+		.text(autoplay ? 'Pause' : 'Play')
+		.at('alt', autoplay ? 'Pause animation' : 'Play animation');
+	advanceChart();
+}
 
-function setupFastButton() {
-	$fastButton
-		.on('click', () => {
-			transitionTime = 500;
-			updateChart();
-		})
+function setupNav() {
+	$autoplayButton.on('click', handleAutoplayToggle);
+	$fastButton.on('click', handleSpeedToggle);
+	$slowButton.on('click', handleSpeedToggle);
 }
 
 function handleSlide(value) {
@@ -49,6 +51,9 @@ function handleSlide(value) {
 		currentDay = +index;
 		updateChart(true);
 		autoplay = false;
+		$autoplayButton
+			.text('Play')
+			.at('alt', 'Play animation');
 	} else {
 		// change style of slider to show it's disabled
 		// keep slider updating without updating data
@@ -73,16 +78,19 @@ function setupSlider() {
 				format: {
 					to: value => {
 						const data = nestedData[Math.round(value)];
-						if (data.key.endsWith('01')) return data.dateDisplay.substring(4, 7);
+						if (data.key.endsWith('01'))
+							return data.dateDisplay.substring(4, 7);
 					}
 				}
 			},
-			tooltips: [{
-				to: value => {
-					const data = nestedData[Math.round(value)];
-					return data.dateDisplay;
+			tooltips: [
+				{
+					to: value => {
+						const data = nestedData[Math.round(value)];
+						return data.dateDisplay;
+					}
 				}
-			}],
+			],
 			range: {
 				min,
 				max
@@ -118,7 +126,7 @@ function loadData() {
 				cleanedData = cleanData(response[0]);
 
 				// console.log(`cleandata: ${  cleanedData}`);
-				console.log(`nesteddata: ${  nestedData}`);
+				console.log(`nesteddata: ${nestedData}`);
 
 				nestedData = d3
 					.nest()
@@ -140,14 +148,16 @@ function loadData() {
 	});
 }
 
+function advanceChart() {
+	if (autoplay && currentDay < nestedData.length - 2) {
+		currentDay += 1;
+		$sliderNode.noUiSlider.set(currentDay);
+		updateChart();
+	}
+}
+
 function finishTransition() {
-	timer = d3.timeout(() => {
-		if (autoplay && currentDay < nestedData.length - 2) {
-			currentDay += 1;
-			$sliderNode.noUiSlider.set(currentDay);
-			updateChart();
-		}
-	}, transitionTime);
+	timer = d3.timeout(advanceChart, transitionDuration);
 }
 
 function updateChart(skip) {
@@ -229,13 +239,6 @@ function updateChart(skip) {
 	};
 
 	exitTransition();
-
-}
-
-function setupTimer() {
-	timer = d3.timer(elapsed => {
-		console.log(elapsed);
-	});
 }
 
 function resize() {
@@ -251,14 +254,9 @@ function init() {
 	resize();
 	loadData()
 		.then(() => {
-			setupPlayButton();
-			setupFastButton()
+			setupNav();
 			updateChart();
 			setupSlider();
-			// setupTimer()
-			// TODO update using d3 timer
-			// setInterval(() => {
-			// }, 5000);
 		})
 		.catch(console.log);
 }
