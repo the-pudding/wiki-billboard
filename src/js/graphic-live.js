@@ -10,27 +10,48 @@ let currentDay = 0;
 let personHeight = 0;
 let timer = null;
 let autoplay = true;
+let transitionTime = 4000
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
 const $rankList = $section.select('ul.live__ranking');
 const $sliderNode = d3.select('.live__slider').node();
+const $playButton = d3.select('.button-play');
+const $fastButton = d3.select('.button-fast');
 
 // function filter500( value, type ){
 // 	return value % 1000 ? 2 : 1;
 // }
+
+function setupPlayButton() {
+	$playButton
+		.on('click', () => {
+			autoplay = (autoplay === true) ? false : true;
+			if (autoplay) {
+				updateChart()
+			}
+		})
+}
+
+
+function setupFastButton() {
+	$fastButton
+		.on('click', () => {
+			transitionTime = 500;
+			updateChart();
+		})
+}
 
 function handleSlide(value) {
 	const [index] = value;
 
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
-		console.log(currentDay);
 		updateChart(true);
 		autoplay = false;
 	} else {
 		// change style of slider to show it's disabled
-		// keep slider updating to
+		// keep slider updating without updating data
 	}
 }
 
@@ -52,22 +73,16 @@ function setupSlider() {
 				format: {
 					to: value => {
 						const data = nestedData[Math.round(value)];
-
-						if (data.key.endsWith('01')) {
-							console.log(data.dateDisplay.substring(4, 7));
-							return data.dateDisplay.substring(4, 7);
-						}
+						if (data.key.endsWith('01')) return data.dateDisplay.substring(4, 7);
 					}
 				}
 			},
-			tooltips: [
-				{
-					to: value => {
-						const data = nestedData[Math.round(value)];
-						return data.dateDisplay;
-					}
+			tooltips: [{
+				to: value => {
+					const data = nestedData[Math.round(value)];
+					return data.dateDisplay;
 				}
-			],
+			}],
 			range: {
 				min,
 				max
@@ -78,7 +93,6 @@ function setupSlider() {
 
 function parseDate(date) {
 	const dates = date.split('-').map(d => +d);
-
 	return new Date(dates[0], dates[1] - 1, dates[2]);
 }
 
@@ -102,6 +116,9 @@ function loadData() {
 			if (error) reject(error);
 			else {
 				cleanedData = cleanData(response[0]);
+
+				// console.log(`cleandata: ${  cleanedData}`);
+				console.log(`nesteddata: ${  nestedData}`);
 
 				nestedData = d3
 					.nest()
@@ -130,7 +147,7 @@ function finishTransition() {
 			$sliderNode.noUiSlider.set(currentDay);
 			updateChart();
 		}
-	}, 3000);
+	}, transitionTime);
 }
 
 function updateChart(skip) {
@@ -213,9 +230,6 @@ function updateChart(skip) {
 
 	exitTransition();
 
-	// Updating current items
-
-	// Update all current items
 }
 
 function setupTimer() {
@@ -237,6 +251,8 @@ function init() {
 	resize();
 	loadData()
 		.then(() => {
+			setupPlayButton();
+			setupFastButton()
 			updateChart();
 			setupSlider();
 			// setupTimer()
