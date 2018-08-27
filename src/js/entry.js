@@ -2,7 +2,7 @@
 import debounce from 'lodash.debounce';
 import isMobile from './utils/is-mobile';
 import graphicLive from './graphic-live';
-// import graphicTally from './graphic-tally';
+import graphicTally from './graphic-tally';
 
 const $body = d3.select('body');
 let previousWidth = 0;
@@ -14,7 +14,7 @@ function resize() {
 	if (previousWidth !== width) {
 		previousWidth = width;
 		graphicLive.resize();
-		// graphicTally.resize();
+		graphicTally.resize();
 	}
 }
 
@@ -40,7 +40,7 @@ function init() {
 	setupStickyHeader();
 	// kick off graphic code
 	graphicLive.init();
-	// graphicTally.init();
+	graphicTally.init();
 }
 
 init();

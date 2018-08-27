@@ -30,7 +30,7 @@ function handleSpeedToggle() {
 }
 
 function handleAutoplayToggle() {
-	console.log('play button pushed');
+	// console.log('play button pushed');
 	autoplay = !autoplay;
 	$autoplayButton
 		.text(autoplay ? 'Pause' : 'Play')
@@ -47,10 +47,10 @@ function setupNav() {
 function handleSlide(value) {
 	const [index] = value;
 
-	console.log(`slide pre-increment ${currentDay}`);
+	// console.log(`slide pre-increment ${currentDay}`);
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
-		console.log(`slide post-increment ${currentDay}`);
+		// console.log(`slide post-increment ${currentDay}`);
 		updateChart(true);
 		autoplay = false;
 		$autoplayButton.text('Play').at('alt', 'Play animation');
@@ -126,7 +126,7 @@ function loadData() {
 				cleanedData = cleanData(response[0]);
 
 				// console.log(`cleandata: ${  cleanedData}`);
-				console.log(`nesteddata: ${nestedData}`);
+				// console.log(`nesteddata: ${nestedData}`);
 
 				nestedData = d3
 					.nest()
@@ -150,7 +150,7 @@ function loadData() {
 
 function advanceChart() {
 	if (autoplay && currentDay < nestedData.length - 2) {
-		console.log(`advance chart fires, day ${currentDay}`);
+		// console.log(`advance chart fires, day ${currentDay}`);
 		currentDay += 1;
 		$sliderNode.noUiSlider.set(currentDay);
 		updateChart(false);
@@ -158,12 +158,12 @@ function advanceChart() {
 }
 
 function finishTransition() {
-	console.log('finish transition fires');
+	// console.log('finish transition fires');
 	timer = d3.timeout(advanceChart, transitionDuration);
 }
 
 function updateChart(skip) {
-	console.log('chart updating');
+	// console.log('chart updating');
 	const data = nestedData[currentDay];
 
 	$dayCounter.text(data.dateDisplay);
@@ -175,7 +175,7 @@ function updateChart(skip) {
 		.data(data.values, d => d.article);
 
 	const mergeTransition = $enteredLi => {
-		console.log('merged transition fires');
+		// console.log('merged transition fires');
 		const $mergedLi = $enteredLi.merge($li);
 
 		let mergedDone = false;
@@ -193,7 +193,7 @@ function updateChart(skip) {
 	};
 
 	const enterTransition = () => {
-		console.log('enter transition fires');
+		// console.log('enter transition fires');
 		const $enteredLi = $li.enter().append('li.person');
 
 		$enteredLi.st('left', '100%').st('top', d => d.rank_people * personHeight);
@@ -202,11 +202,11 @@ function updateChart(skip) {
 	};
 
 	const updateTransition = () => {
-		console.log('update transition fires');
+		// console.log('update transition fires');
 		let updateCount = 0;
 
 		const updateSize = $li.size();
-		console.log(`update size ${updateSize}`);
+		// console.log(`update size ${updateSize}`);
 
 		if (updateSize === 0) {
 			enterTransition();
@@ -218,21 +218,21 @@ function updateChart(skip) {
 				.st('top', d => d.rank_people * personHeight)
 				.on('end', () => {
 					updateCount += 1;
-					console.log(`update count is ${updateCount}`);
-					console.log(`update size is ${updateSize}`);
+					// console.log(`update count is ${updateCount}`);
+					// console.log(`update size is ${updateSize}`);
 					if (updateCount === updateSize) enterTransition();
 				});
 		}
 	};
 
 	const exitTransition = () => {
-		console.log('exit transition fires');
+		// console.log('exit transition fires');
 		let exitDone = false;
 
 		const $liExit = $li.exit();
 
-		console.log(`exit array size ${$liExit.size()}`);
-		console.log(`skip? ${skip}`);
+		// console.log(`exit array size ${$liExit.size()}`);
+		// console.log(`skip? ${skip}`);
 		if ($liExit.size() === 0) {
 			updateTransition();
 		} else {
@@ -243,7 +243,7 @@ function updateChart(skip) {
 				.st('left', '0%') // TODO
 				.st('opacity', 0)
 				.on('end', () => {
-					console.log(`is exit done? ${exitDone}`);
+					// console.log(`is exit done? ${exitDone}`);
 					if (!exitDone) updateTransition();
 					exitDone = true;
 				})
