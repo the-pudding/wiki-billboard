@@ -83,14 +83,12 @@ function setupSlider() {
 					}
 				}
 			},
-			tooltips: [
-				{
-					to: value => {
-						const data = nestedData[Math.round(value)];
-						return data.dateDisplay;
-					}
+			tooltips: [{
+				to: value => {
+					const data = nestedData[Math.round(value)];
+					return data.dateDisplay;
 				}
-			],
+			}],
 			range: {
 				min,
 				max
@@ -263,7 +261,8 @@ function resize() {
 	});
 }
 
-function init() {
+function init(dataPeople) {
+	console.log(dataPeople)
 	resize();
 	loadData()
 		.then(() => {

@@ -3,6 +3,7 @@ import debounce from 'lodash.debounce';
 import isMobile from './utils/is-mobile';
 import graphicLive from './graphic-live';
 import graphicTally from './graphic-tally';
+import peopleData from './people-data';
 
 const $body = d3.select('body');
 let previousWidth = 0;
@@ -39,8 +40,13 @@ function init() {
 	// setup sticky header menu
 	setupStickyHeader();
 	// kick off graphic code
-	graphicLive.init();
-	graphicTally.init();
+
+	peopleData.init()
+		.then((dataPeople) => {
+			graphicLive.init(dataPeople);
+			graphicTally.init(dataPeople);
+		})
+
 }
 
 init();

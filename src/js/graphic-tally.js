@@ -49,7 +49,6 @@ function loadData() {
 					.nest()
 					.key(d => d.name)
 					.entries(cleanedData);
-
 				resolve()
 			}
 		})
@@ -129,7 +128,8 @@ function resize() {
 	render()
 }
 
-function init() {
+function init(dataPeople) {
+	console.log(dataPeople)
 	loadData()
 		.then(() => {
 			setupChart()
