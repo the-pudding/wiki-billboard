@@ -41,8 +41,9 @@ function init() {
 	setupStickyHeader();
 	// kick off graphic code
 
-	peopleData.init()
+	peopleData()
 		.then((dataPeople) => {
+			console.log(dataPeople)
 			graphicLive.init(dataPeople);
 			graphicTally.init(dataPeople);
 		})

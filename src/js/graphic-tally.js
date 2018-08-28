@@ -87,9 +87,6 @@ function setupChart() {
 	scaleY
 		.domain([0, d3.max(cleanedData, d => d.views_sum)])
 
-	console.log(scaleY
-		.domain())
-
 }
 
 
