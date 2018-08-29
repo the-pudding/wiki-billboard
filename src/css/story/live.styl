@@ -1,13 +1,20 @@
 #live
-	margin-top 20vh
+	max-width 60rem
+	margin 0 auto
 	ul.live__ranking
 		position relative
 		width 100%
+		margin-top 3rem
 	li.person
-		background-color white
+		display block
+		background-color $white
 		position absolute
-		list-style-position inside
-		border 1px solid black 
+		set-type-size(large, false)
+		line-height 1
+		padding 0.25rem 0
+		width 15rem
+		text-align left
+		transform translate(-50%, 0)
 	.live__nav-buttons		
 		background-color pink
 		height 20px

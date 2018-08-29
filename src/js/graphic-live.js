@@ -83,12 +83,14 @@ function setupSlider() {
 					}
 				}
 			},
-			tooltips: [{
-				to: value => {
-					const data = nestedData[Math.round(value)];
-					return data.dateDisplay;
+			tooltips: [
+				{
+					to: value => {
+						const data = nestedData[Math.round(value)];
+						return data.dateDisplay;
+					}
 				}
-			}],
+			],
 			range: {
 				min,
 				max
@@ -166,95 +168,158 @@ function updateChart(skip) {
 
 	$dayCounter.text(data.dateDisplay);
 
-	// Select pre-existing items
+	// unfinished business
+	$rankList.selectAll('.is-exit').remove();
 
+	$rankList
+		.selectAll('.is-merge')
+		.st('top', d => d.rank_people * personHeight)
+		.st('opacity', 1)
+		.st('left', '50%')
+		.classed('is-merge', false);
+
+	// update data join
 	const $li = $rankList
 		.selectAll('li.person')
 		.data(data.values, d => d.article);
 
-	const mergeTransition = $enteredLi => {
-		// console.log('merged transition fires');
-		const $mergedLi = $enteredLi.merge($li);
+	// exit
+	const $liExit = $li.exit();
 
-		let mergedDone = false;
+	$liExit
+		.classed('is-exit', true)
+		.transition()
+		.duration(1000)
+		.ease(d3.easeCubicInOut)
+		.st('left', '0%')
+		.st('opacity', 0)
+		.remove();
 
-		$mergedLi
-			.text(d => `${d.rank_people + 1}. ${d.name}`)
-			.transition()
-			.duration(skip ? 0 : 500) // TODO
-			.st('top', d => d.rank_people * personHeight)
-			.st('left', '50%')
-			.on('end', () => {
-				if (!mergedDone) finishTransition();
-				mergedDone = true;
-			});
-	};
+	// update
+	$li
+		// .classed('is-update', true)
+		.transition()
+		.delay(d => 1000 + d.rank_people * 200)
+		.duration(1000)
+		.st('top', d => d.rank_people * personHeight);
 
-	const enterTransition = () => {
-		// console.log('enter transition fires');
-		const $enteredLi = $li.enter().append('li.person');
+	// enter
+	const $liEnter = $li.enter().append('li.person');
 
-		$enteredLi.st('left', '100%').st('top', d => d.rank_people * personHeight);
+	$liEnter
+		.classed('is-enter', true)
+		.st('opacity', 0)
+		.st('left', '100%')
+		.st('top', d => d.rank_people * personHeight);
 
-		mergeTransition($enteredLi);
-	};
+	// merge
+	const $liMerge = $liEnter.merge($li);
 
-	const updateTransition = () => {
-		// console.log('update transition fires');
-		let updateCount = 0;
-
-		const updateSize = $li.size();
-		// console.log(`update size ${updateSize}`);
-
-		if (updateSize === 0) {
-			enterTransition();
-		} else {
-			$li
-				.transition()
-				.delay((d, i) => (skip ? 0 : d.rank_people * 200))
-				.duration(skip ? 0 : 500)
-				.st('top', d => d.rank_people * personHeight)
-				.on('end', () => {
-					updateCount += 1;
-					// console.log(`update count is ${updateCount}`);
-					// console.log(`update size is ${updateSize}`);
-					if (updateCount === updateSize) enterTransition();
-				});
-		}
-	};
-
-	const exitTransition = () => {
-		// console.log('exit transition fires');
-		let exitDone = false;
-
-		const $liExit = $li.exit();
-
-		// console.log(`exit array size ${$liExit.size()}`);
-		// console.log(`skip? ${skip}`);
-		if ($liExit.size() === 0) {
-			updateTransition();
-		} else {
-			$liExit
-				.transition()
-				.duration(skip ? 0 : 1000) // TODO
-				.ease(d3.easeCubicInOut)
-				.st('left', '0%') // TODO
-				.st('opacity', 0)
-				.on('end', () => {
-					// console.log(`is exit done? ${exitDone}`);
-					if (!exitDone) updateTransition();
-					exitDone = true;
-				})
-				.remove();
-		}
-	};
-
-	exitTransition();
+	$liMerge
+		.transition()
+		.delay(2000)
+		.duration(1000)
+		.text(d => `${d.rank_people + 1}. ${d.name}`)
+		.st('top', d => d.rank_people * personHeight)
+		.st('opacity', 1)
+		.st('left', '50%');
 }
+
+// function updateChart(skip) {
+// 	// console.log('chart updating');
+// 	const data = nestedData[currentDay];
+
+// 	$dayCounter.text(data.dateDisplay);
+
+// 	// Select pre-existing items
+
+// 	const $li = $rankList
+// 		.selectAll('li.person')
+// 		.data(data.values, d => d.article);
+
+// 	const mergeTransition = $enteredLi => {
+// 		// console.log('merged transition fires');
+// 		const $mergedLi = $enteredLi.merge($li);
+
+// 		let mergedDone = false;
+
+// 		$mergedLi
+// 			.text(d => `${d.rank_people + 1}. ${d.name}`)
+// 			.transition()
+// 			.duration(skip ? 0 : 500) // TODO
+// 			.st('top', d => d.rank_people * personHeight)
+// 			.st('left', '50%')
+// 			.on('end', () => {
+// 				if (!mergedDone) finishTransition();
+// 				mergedDone = true;
+// 			});
+// 	};
+
+// 	const enterTransition = () => {
+// 		// console.log('enter transition fires');
+// 		const $enteredLi = $li.enter().append('li.person');
+
+// 		$enteredLi.st('left', '100%').st('top', d => d.rank_people * personHeight);
+
+// 		mergeTransition($enteredLi);
+// 	};
+
+// 	const updateTransition = () => {
+// 		// console.log('update transition fires');
+// 		let updateCount = 0;
+
+// 		const updateSize = $li.size();
+// 		// console.log(`update size ${updateSize}`);
+
+// 		if (updateSize === 0) {
+// 			enterTransition();
+// 		} else {
+// 			$li
+// 				.transition()
+// 				.delay((d, i) => (skip ? 0 : d.rank_people * 200))
+// 				.duration(skip ? 0 : 500)
+// 				.st('top', d => d.rank_people * personHeight)
+// 				.on('end', () => {
+// 					updateCount += 1;
+// 					// console.log(`update count is ${updateCount}`);
+// 					// console.log(`update size is ${updateSize}`);
+// 					if (updateCount === updateSize) enterTransition();
+// 				});
+// 		}
+// 	};
+
+// 	const exitTransition = () => {
+// 		// console.log('exit transition fires');
+// 		let exitDone = false;
+
+// 		const $liExit = $li.exit();
+
+// 		// console.log(`exit array size ${$liExit.size()}`);
+// 		// console.log(`skip? ${skip}`);
+// 		if ($liExit.size() === 0) {
+// 			updateTransition();
+// 		} else {
+// 			$liExit
+// 				.transition()
+// 				.duration(skip ? 0 : 1000) // TODO
+// 				.ease(d3.easeCubicInOut)
+// 				.st('left', '0%') // TODO
+// 				.st('opacity', 0)
+// 				.on('end', () => {
+// 					// console.log(`is exit done? ${exitDone}`);
+// 					if (!exitDone) updateTransition();
+// 					exitDone = true;
+// 				})
+// 				.remove();
+// 		}
+// 	};
+
+// 	exitTransition();
+// }
 
 function resize() {
 	// update height of ul
-	personHeight = 20;
+	personHeight = 32;
 	const height = NUM_PEOPLE * personHeight;
 	$rankList.st({
 		height
