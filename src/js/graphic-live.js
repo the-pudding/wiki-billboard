@@ -138,7 +138,7 @@ function loadData() {
 					}));
 				currentDay = nestedData.length - DAYS_TO_START;
 
-				console.log(nestedData);
+				// console.log(nestedData);
 
 				resolve();
 			}
@@ -262,7 +262,7 @@ function resize() {
 }
 
 function init(dataPeople) {
-	console.log(dataPeople)
+	// console.log(dataPeople)
 	resize();
 	loadData()
 		.then(() => {

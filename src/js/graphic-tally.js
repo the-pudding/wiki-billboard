@@ -10,6 +10,8 @@ const $gViz = $svg.select('.g-viz')
 
 const scaleX = d3.scaleTime();
 const scaleY = d3.scaleLinear();
+let width = 0;
+let height = 0;
 
 
 function parseDate(date) {
@@ -34,8 +36,7 @@ function cleanTheData(data) {
 function loadData() {
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now()
-		// const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally--score.csv?version=${timeStamped}`
-		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally--views.csv?version=${timeStamped}`
+		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-views--alive.csv?version=${timeStamped}`
 
 		d3.loadData(dataURL, (error, response) => {
 
@@ -43,12 +44,22 @@ function loadData() {
 			else {
 				cleanedData = cleanTheData(response[0])
 
-				console.log(response[0])
+				// console.log(response[0])
 
-				nestedData = d3
+				const tempNestedData = d3
 					.nest()
 					.key(d => d.name)
-					.entries(cleanedData);
+					.entries(cleanedData)
+
+				tempNestedData
+					.sort((a, b) => {
+						const maxA = a.values[a.values.length - 1].views_sum
+						const maxB = b.values[b.values.length - 1].views_sum
+						return d3.descending(maxA, maxB)
+					})
+
+				nestedData = tempNestedData
+					.slice(0, 20)
 				resolve()
 			}
 		})
@@ -60,6 +71,37 @@ function loadData() {
 // return d3.max(maxes)
 // }
 
+
+function setupVoronoi() {
+	const voronoi = d3.voronoi()
+		.x(d => scaleX(d.date))
+		.y(d => scaleY(d.views_sum))
+		.extent([
+			[0, 0],
+			[width, height]
+		])
+
+	let $voronoiGroup = $gViz
+		.append('g')
+		.at('class', 'g-voronoi')
+
+	d3.merge(nestedData.map(d => {
+		console.log(d.values);
+		return d.values;
+	}))
+
+	// console.log('merge check: ' + mergeCheck)
+
+	$voronoiGroup
+		.data(voronoi.polygons(d3.merge(nestedData.map(d => d.values))))
+		.enter()
+		.append("path")
+		.attr("d", d => d ? "M" + d.join("L") + "Z" : null)
+		.on("mouseover", () => console.log('mouseover!'))
+		.on("mouseout", () => console.log('mouseout!'))
+
+}
+
 function setupChart() {
 	// bind data to dom elements
 	const $person = $gViz
@@ -70,6 +112,7 @@ function setupChart() {
 	const $personEnter = $person
 		.enter()
 		.append('g.person')
+		.at('data-name', d => d.key)
 
 	$personEnter
 		.append('path')
@@ -87,7 +130,10 @@ function setupChart() {
 	scaleY
 		.domain([0, d3.max(cleanedData, d => d.views_sum)])
 
+	// setupVoronoi()
+
 }
+
 
 
 function render() {
@@ -95,6 +141,9 @@ function render() {
 	const line = d3.line()
 		.x(d => scaleX(d.date))
 		.y(d => scaleY(d.views_sum))
+		.curve(d3.curveStepBefore)
+
+	console.log(nestedData)
 
 	$gViz
 		.selectAll('.person path')
@@ -104,11 +153,11 @@ function render() {
 
 function resize() {
 	// Grab width
-	const width = $figure
+	width = $figure
 		.node()
 		.offsetWidth
 
-	const height = window
+	height = window
 		.innerHeight
 
 	// update range
@@ -126,7 +175,7 @@ function resize() {
 }
 
 function init(dataPeople) {
-	console.log(dataPeople)
+	// console.log(dataPeople)
 	loadData()
 		.then(() => {
 			setupChart()

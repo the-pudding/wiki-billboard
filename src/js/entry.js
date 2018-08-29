@@ -43,7 +43,14 @@ function init() {
 
 	peopleData()
 		.then((dataPeople) => {
-			console.log(dataPeople)
+
+
+			console.table(d3.nest()
+				.key(d => d.occupation)
+				.rollup(v => v.length)
+				.entries(dataPeople)
+			)
+
 			graphicLive.init(dataPeople);
 			graphicTally.init(dataPeople);
 		})
