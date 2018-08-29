@@ -7,11 +7,25 @@ const $figure = $tallyEstablished.select('figure')
 const $svg = $figure.select('svg')
 const $gAxes = $svg.select('.g-axes')
 const $gViz = $svg.select('.g-viz')
+let $celebPaths = null;
+let $voronoiGroup = null;
+let $personEnter = null;
+let $personText = null;
+
 
 const scaleX = d3.scaleTime();
 const scaleY = d3.scaleLinear();
+const voronoi = d3.voronoi()
+
 let width = 0;
 let height = 0;
+
+const MARGIN = {
+	top: 20,
+	bottom: 40,
+	left: 50,
+	right: 200
+};
 
 
 function parseDate(date) {
@@ -25,7 +39,7 @@ function cleanTheData(data) {
 		name: person.article.replace(/_/g, ' '),
 		rank_people: +person.rank_people,
 		views: +person.views,
-		score: +person.score,
+		// score: +person.score,
 		dateString: person.date,
 		// score_sum: +person.score_sum,
 		views_sum: +person.views_sum,
@@ -37,6 +51,7 @@ function loadData() {
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now()
 		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-views--alive.csv?version=${timeStamped}`
+		// const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-appearance--alive.csv?version=${timeStamped}`
 
 		d3.loadData(dataURL, (error, response) => {
 
@@ -71,9 +86,30 @@ function loadData() {
 // return d3.max(maxes)
 // }
 
+function handleVoronoiEnter(d) {
+	const celebrityName = d.data.name;
+
+	$gViz
+		.select(`[data-name='${celebrityName}'] path`)
+		.st('stroke', '#f33')
+
+	$gViz
+		.select(`[data-name='${celebrityName}'] text`)
+		.st('font-weight', '900')
+}
+
+function handleVoronoiLeave(d) {
+	$gViz
+		.selectAll('path')
+		.st('stroke', '#000000')
+
+	$gViz
+		.selectAll('text')
+		.st('font-weight', '400')
+}
 
 function setupVoronoi() {
-	const voronoi = d3.voronoi()
+	voronoi
 		.x(d => scaleX(d.date))
 		.y(d => scaleY(d.views_sum))
 		.extent([
@@ -81,24 +117,23 @@ function setupVoronoi() {
 			[width, height]
 		])
 
-	let $voronoiGroup = $gViz
+	$voronoiGroup = $gViz
 		.append('g')
 		.at('class', 'g-voronoi')
 
-	d3.merge(nestedData.map(d => {
-		console.log(d.values);
-		return d.values;
-	}))
+	const mergedData = d3.merge(nestedData.map(d => d.values))
 
-	// console.log('merge check: ' + mergeCheck)
+	const $voronoiPath = $voronoiGroup
+		.selectAll('path')
 
-	$voronoiGroup
-		.data(voronoi.polygons(d3.merge(nestedData.map(d => d.values))))
+	$voronoiPath
+		.data(voronoi.polygons(mergedData))
 		.enter()
-		.append("path")
-		.attr("d", d => d ? "M" + d.join("L") + "Z" : null)
-		.on("mouseover", () => console.log('mouseover!'))
-		.on("mouseout", () => console.log('mouseout!'))
+		.append('path.voronoi')
+		.on('mouseenter', handleVoronoiEnter)
+		.on('mouseout', handleVoronoiLeave)
+		// .merge($voronoiPath)
+		.attr("d", d => (d ? "M" + d.join("L") + "Z" : null))
 
 }
 
@@ -109,7 +144,7 @@ function setupChart() {
 		.data(nestedData)
 
 	// create elements
-	const $personEnter = $person
+	$personEnter = $person
 		.enter()
 		.append('g.person')
 		.at('data-name', d => d.key)
@@ -117,11 +152,10 @@ function setupChart() {
 	$personEnter
 		.append('path')
 
-	$personEnter
+	$personText = $personEnter
 		.append('text')
 		.text(d => d.key)
-		.at('x', 0)
-		.at('y', 0)
+
 
 	// setup scales
 	scaleX
@@ -129,9 +163,6 @@ function setupChart() {
 
 	scaleY
 		.domain([0, d3.max(cleanedData, d => d.views_sum)])
-
-	// setupVoronoi()
-
 }
 
 
@@ -143,12 +174,30 @@ function render() {
 		.y(d => scaleY(d.views_sum))
 		.curve(d3.curveStepBefore)
 
-	console.log(nestedData)
+	$personText
+		.at('y', d => {
+			const totalViews = +d.values[d.values.length - 1]['views_sum'];
+			console.log('name ' + d.values[d.values.length - 1]['article'])
+			console.log('total views ' + d.values[d.values.length - 1]['views_sum'])
+			console.log('coordinates ' + scaleY(totalViews))
+			return scaleY(totalViews)
+		})
+		.at('x', d => {
+			const finalDate = d.values[d.values.length - 1]['date'];
+			return scaleX(finalDate)
+		})
+
+	// console.log(nestedData)
 
 	$gViz
 		.selectAll('.person path')
-		.datum(d => d.values)
+		// .at('data-name', d => d.key)
+		.datum(d => {
+			console.log(d)
+			return d.values
+		})
 		.at('d', line)
+
 }
 
 function resize() {
@@ -162,16 +211,17 @@ function resize() {
 
 	// update range
 	scaleX
-		.range([0, width])
+		.range([MARGIN.left, (width - MARGIN.right)])
 
 	scaleY
-		.range([height, 0])
+		.range([(height - MARGIN.bottom), MARGIN.top])
 
 	$svg
 		.at('width', width)
 		.at('height', height)
 
 	render()
+	setupVoronoi()
 }
 
 function init(dataPeople) {
