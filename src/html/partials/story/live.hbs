@@ -1,13 +1,16 @@
 <section id='live'>
 	<nav class='live__nav'>
 		<fieldset>
-			<div class='autoplay'>
-				<button class='autoplay__toggle' alt='pause animation'>Pause</button>
-			</div>
-			<div class='speed'>
-				<button data-speed='4000' class='speed__slow is-selected' alt='slower animation'>Slow</button>
-				<button data-speed='1000' class='speed__fast' alt='faster animation'>Fast</button>
-			</div>
+			<div class='options'>
+				<div class='autoplay'>
+					<label for='btn--autoplay'>Autoplay</label>
+					<button id='btn--autoplay' class='btn btn--autoplay' alt='pause animation'>Pause</button>
+				</div>
+				<div class='speed'>
+					<label for='speed-btn'>Speed</label>
+					<button id='btn--speed' class='btn btn--speed'>1x</button>
+				</div>
+			</div>	
 		</fieldset>
 	</nav>
 	<figure>

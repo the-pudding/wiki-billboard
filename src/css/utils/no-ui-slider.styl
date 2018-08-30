@@ -301,7 +301,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 				display block
 				width 100%
 				height 2px
-				background $fg
+				background $gray
 				top 50%
 				position absolute
 				border-radius 2px
@@ -312,7 +312,7 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 			left -@width * 0.5
 			top 0
 			border 2px solid $fg
-			background-color $primary
+			background-color $gray
 			border-radius 50%
 			box-shadow none
 			cursor pointer
@@ -320,4 +320,28 @@ html:not([dir="rtl"]) .noUi-horizontal .noUi-handle {
 				display none
 			&:after
 				display none
-		
+
+	.noUi-pips-horizontal
+		top 0.25rem
+	
+	.noUi-marker.noUi-marker-horizontal.noUi-marker-normal
+		display none
+	
+	.noUi-marker-horizontal.noUi-marker-large
+		height 0.75rem
+
+	.noUi-value-large
+		set-type-size(xx-small, false)
+		text-transform uppercase
+		font-weight 600
+		transform translate(-50%, 75%)
+		letter-spacing 0.05em
+		color $gray
+	
+	.noUi-tooltip
+		set-type-size(xx-small, false)
+		text-transform uppercase
+		color $gray
+		font-weight 600
+		border none
+		letter-spacing 0.05em

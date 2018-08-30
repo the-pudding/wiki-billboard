@@ -6,9 +6,16 @@
   "imgFacebook": "https://pudding.cool/year/month/name/assets/social/social-facebook.jpg",
   "imgTwitter": "https://pudding.cool/year/month/name/assets/social/social-twitter.jpg",
   "author": {
-    "name": "Author Name",
-    "url": "https://twitter.com/puddingviz",
-    "twitterHandle": "@puddingviz"
+    "name": "Ilia Blinderman",
+    "url": "https://pudding.cool/author/ilia-blinderman"
+  },
+  "author2": {
+    "name": "Caitlyn Ralph",
+    "url": "https://pudding.cool/author/caitlyn-ralph"
+  },
+  "author3": {
+    "name": "Russell Goldenberg",
+    "url": "https://pudding.cool/author/russell-goldenberg"
   },
   "analytics": ""
 }

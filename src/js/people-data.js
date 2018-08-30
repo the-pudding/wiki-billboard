@@ -1,7 +1,8 @@
 import nGram from 'n-gram';
 import dictionary from './people-dictionary.json';
+import categories from './people-categories.json';
 
-function lookup(description) {
+function lookupOccupation(description) {
 	const tokens = description
 		.toLowerCase()
 		.replace(/[^a-z]/g, ' ')
@@ -32,11 +33,22 @@ function lookup(description) {
 	return match;
 }
 
+function lookupCategory(occupation) {
+	const keys = Object.keys(categories);
+	const match = keys.find(key => categories[key].includes(occupation));
+	return match;
+}
+
 function addOccupation(data) {
-	return data.map(person => ({
-		...person,
-		occupation: lookup(person.description)
-	}));
+	return data.map(person => {
+		const occupation = lookupOccupation(person.description);
+		const category = lookupCategory(occupation);
+		return {
+			...person,
+			occupation,
+			category
+		};
+	});
 }
 
 function init() {

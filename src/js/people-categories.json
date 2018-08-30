@@ -1,0 +1,14 @@
+{
+  "film/tv/theater": ["film/tv/theater"],
+  "sports": ["sports"],
+  "music": ["music"],
+  "culture": ["entertainment", "artist", "internet", "writing"],
+  "misc": [
+    "royalty",
+    "politics",
+    "business",
+    "religion",
+    "science",
+    "law/crime"
+  ]
+}
