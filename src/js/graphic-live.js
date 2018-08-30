@@ -69,16 +69,10 @@ function handleSlide(value) {
 	isSliding = true;
 	const [index] = value;
 
-	// console.log(`slide pre-increment ${currentDay}`);
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
-		// console.log(`slide post-increment ${currentDay}`);
 		updateChart(true);
 		autoplay = false;
-		$autoplayButton.text('Play').at('alt', 'Play animation');
-	} else {
-		// change style of slider to show it's disabled
-		// keep slider updating without updating data
 	}
 }
 
@@ -87,39 +81,38 @@ function setupSlider() {
 	const max = nestedData.length - 1;
 	const start = currentDay;
 
-	noUiSlider
-		.create($sliderNode, {
-			start,
-			step: 1,
-			pips: {
-				filter: value => {
-					const data = nestedData[Math.round(value)];
-					return data.key.endsWith('01') ? 1 : 0;
-				},
-				mode: 'steps',
-				format: {
-					to: value => {
-						const data = nestedData[Math.round(value)];
-						if (data.key.endsWith('01'))
-							return data.dateDisplay.substring(4, 7);
-					}
-				}
+	const slider = noUiSlider.create($sliderNode, {
+		start,
+		step: 1,
+		pips: {
+			filter: value => {
+				const data = nestedData[Math.round(value)];
+				return data.key.endsWith('01') ? 1 : 0;
 			},
-			tooltips: [
-				{
-					to: value => {
-						const data = nestedData[Math.round(value)];
-						return data.dateDisplay.slice(4);
-					}
+			mode: 'steps',
+			format: {
+				to: value => {
+					const data = nestedData[Math.round(value)];
+					if (data.key.endsWith('01')) return data.dateDisplay.substring(4, 7);
 				}
-			],
-			range: {
-				min,
-				max
 			}
-		})
-		.on('slide', handleSlide)
-		.on('end', handleEnd);
+		},
+		tooltips: [
+			{
+				to: value => {
+					const data = nestedData[Math.round(value)];
+					return data.dateDisplay.slice(4);
+				}
+			}
+		],
+		range: {
+			min,
+			max
+		}
+	});
+
+	slider.on('slide', handleSlide);
+	slider.on('end', handleEnd);
 }
 
 function parseDate(date) {
