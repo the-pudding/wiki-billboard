@@ -15,7 +15,7 @@ function resize() {
 	if (previousWidth !== width) {
 		previousWidth = width;
 		graphicLive.resize();
-		// graphicTally.resize();
+		graphicTally.resize();
 	}
 }
 
@@ -43,7 +43,7 @@ function init() {
 
 	peopleData().then(dataPeople => {
 		graphicLive.init(dataPeople);
-		// graphicTally.init(dataPeople);
+		graphicTally.init(dataPeople);
 	});
 }
 
