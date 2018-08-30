@@ -1,24 +1,77 @@
 #live
-	margin-top 20vh
+	max-width 60rem
+	margin 0 auto
+	padding 1rem
+
+	figure
+		position relative
+
 	ul.live__ranking
 		position relative
 		width 100%
+		margin-top 3rem
+	
 	li.person
-		background-color white
+		display block
+		background-color $white
 		position absolute
-		list-style-position inside
-		border 1px solid black 
-	.live__nav-buttons		
-		background-color pink
-		height 20px
-		position relative
-		.button-play
-			background-color green
-			height 20px
-			width 10%
-			display inline
-		.button-fast
-			background-color purple 
-			height 20px
-			width 10%
-			display inline
+		font-size 20px
+		line-height 1
+		padding 0.5rem
+		width 19rem
+		text-align left
+		transform translate(-50%, 0)
+		background-color $off-white
+		&:after
+			display block
+			content '+'
+			position absolute
+			top 25%
+			right 0.5rem
+			line-height 1
+			font-weight 600
+			cursor pointer
+			color $fg
+		.rank
+			font-size 0.75em
+			margin-right 0.5em
+		.name
+			font-weight 600
+
+	nav
+		margin-bottom 1.75rem
+	.options
+		display flex
+		justify-content center
+
+		label
+			display block
+			text-align center
+			set-type-size(xx-small, false)
+			margin-bottom 0.25em
+			text-transform uppercase
+			font-weight 600
+			letter-spacing 0.05em
+			color $gray
+		
+		button
+			display block
+			width 5rem
+			text-align center
+			background-color $gray-light
+			border-radius 3px
+			padding 0.25em
+			margin 0 0.25em
+			font-weight 600
+			set-type-size(small, false)
+
+	.live__date-counter
+		position absolute
+		top 50%
+		left 12.5%
+		set-type-size(xx-large, false)
+		line-height 1
+		color $gray
+		font-weight 300
+		width 5rem
+		transform translate(-50%, -50%)

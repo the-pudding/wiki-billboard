@@ -15,7 +15,7 @@ function resize() {
 	if (previousWidth !== width) {
 		previousWidth = width;
 		graphicLive.resize();
-		graphicTally.resize();
+		// graphicTally.resize();
 	}
 }
 
@@ -41,20 +41,10 @@ function init() {
 	setupStickyHeader();
 	// kick off graphic code
 
-	peopleData()
-		.then((dataPeople) => {
-
-
-			console.table(d3.nest()
-				.key(d => d.occupation)
-				.rollup(v => v.length)
-				.entries(dataPeople)
-			)
-
-			graphicLive.init(dataPeople);
-			graphicTally.init(dataPeople);
-		})
-
+	peopleData().then(dataPeople => {
+		graphicLive.init(dataPeople);
+		// graphicTally.init(dataPeople);
+	});
 }
 
 init();

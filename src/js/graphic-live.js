@@ -1,62 +1,73 @@
 /* global d3 */
 import * as noUiSlider from 'nouislider';
+import truncate from './utils/truncate';
+import colors from './colors.json';
 
 const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
 
 let cleanedData = [];
 let nestedData = [];
+let peopleData = [];
 let currentDay = 0;
 let personHeight = 0;
 let timer = null;
 let autoplay = true;
-let transitionDuration = 4000;
+let speedIndex = 0;
+let isSliding = false;
+
+const SPEEDS = [8000, 4000, 2000];
+const RATES = [1, 0.5, 0.25];
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
 const $rankList = $section.select('ul.live__ranking');
 const $sliderNode = $section.select('.live__slider').node();
 const $nav = $section.select('nav');
-const $autoplayButton = $nav.select('.autoplay__toggle');
-const $speedButtons = $nav.selectAll('.speed button');
+const $autoplayButton = $nav.select('.btn--autoplay');
+const $speedButton = $nav.selectAll('.btn--speed');
 const $fastButton = $nav.select('.speed__fast');
 const $slowButton = $nav.select('.speed__slow');
 
+function zeroPad(number) {
+	return d3.format('02')(number);
+}
+
 function handleSpeedToggle() {
-	const $btn = d3.select(this);
-	transitionDuration = +$btn.at('data-speed');
-	$speedButtons.classed('is-selected', false);
-	$btn.classed('is-selected', true);
+	speedIndex = +$speedButton.text().replace('x', '') - 1;
+	speedIndex += 1;
+	if (speedIndex >= SPEEDS.length) speedIndex = 0;
+
+	$speedButton.text(`${speedIndex + 1}x`);
+	advanceChart();
 }
 
 function handleAutoplayToggle() {
-	// console.log('play button pushed');
 	autoplay = !autoplay;
 	$autoplayButton
 		.text(autoplay ? 'Pause' : 'Play')
 		.at('alt', autoplay ? 'Pause animation' : 'Play animation');
-	advanceChart();
+
+	if (autoplay) advanceChart();
+	else if (timer) timer.stop();
 }
 
 function setupNav() {
 	$autoplayButton.on('click', handleAutoplayToggle);
-	$fastButton.on('click', handleSpeedToggle);
-	$slowButton.on('click', handleSpeedToggle);
+	$speedButton.on('click', handleSpeedToggle);
+}
+
+function handleEnd() {
+	isSliding = false;
 }
 
 function handleSlide(value) {
+	isSliding = true;
 	const [index] = value;
 
-	// console.log(`slide pre-increment ${currentDay}`);
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
-		// console.log(`slide post-increment ${currentDay}`);
 		updateChart(true);
-		autoplay = false;
-		$autoplayButton.text('Play').at('alt', 'Play animation');
-	} else {
-		// change style of slider to show it's disabled
-		// keep slider updating without updating data
 	}
 }
 
@@ -65,36 +76,38 @@ function setupSlider() {
 	const max = nestedData.length - 1;
 	const start = currentDay;
 
-	noUiSlider
-		.create($sliderNode, {
-			start,
-			step: 1,
-			pips: {
-				filter: value => {
-					const data = nestedData[Math.round(value)];
-					return data.key.endsWith('01') ? 1 : 0;
-				},
-				mode: 'steps',
-				format: {
-					to: value => {
-						const data = nestedData[Math.round(value)];
-						if (data.key.endsWith('01'))
-							return data.dateDisplay.substring(4, 7);
-					}
-				}
+	const slider = noUiSlider.create($sliderNode, {
+		start,
+		step: 1,
+		pips: {
+			filter: value => {
+				const data = nestedData[Math.round(value)];
+				return data.key.endsWith('01') ? 1 : 0;
 			},
-			tooltips: [{
+			mode: 'steps',
+			format: {
 				to: value => {
 					const data = nestedData[Math.round(value)];
-					return data.dateDisplay;
+					if (data.key.endsWith('01')) return data.dateDisplay.substring(4, 7);
 				}
-			}],
-			range: {
-				min,
-				max
 			}
-		})
-		.on('slide', handleSlide);
+		},
+		tooltips: [
+			{
+				to: value => {
+					const data = nestedData[Math.round(value)];
+					return data.dateDisplay.slice(4);
+				}
+			}
+		],
+		range: {
+			min,
+			max
+		}
+	});
+
+	slider.on('slide', handleSlide);
+	slider.on('end', handleEnd);
 }
 
 function parseDate(date) {
@@ -102,10 +115,33 @@ function parseDate(date) {
 	return new Date(dates[0], dates[1] - 1, dates[2]);
 }
 
+function nestData() {
+	return d3
+		.nest()
+		.key(d => d.dateString)
+		.entries(cleanedData)
+		.map(d => ({
+			...d,
+			dateDisplay: parseDate(d.key)
+				.toString()
+				.substring(0, 10)
+		}));
+}
+
+function getColor(article) {
+	const match = peopleData.find(p => p.article === article);
+	return match ? colors[match.category] : null;
+}
+
 function cleanData(data) {
 	return data.map(person => ({
 		article: person.article,
-		name: person.article.replace(/_/g, ' '),
+		name: truncate({
+			text: person.article.replace(/_/g, ' '),
+			chars: 22,
+			ellipses: true
+		}),
+		color: getColor(person.article),
 		rank_people: +person.rank_people,
 		views: +person.views,
 		dateString: person.date,
@@ -122,20 +158,8 @@ function loadData() {
 			if (error) reject(error);
 			else {
 				cleanedData = cleanData(response[0]);
+				nestedData = nestData();
 
-				// console.log(`cleandata: ${  cleanedData}`);
-				// console.log(`nesteddata: ${nestedData}`);
-
-				nestedData = d3
-					.nest()
-					.key(d => d.dateString)
-					.entries(cleanedData)
-					.map(d => ({
-						...d,
-						dateDisplay: parseDate(d.key)
-							.toString()
-							.substring(0, 10)
-					}));
 				currentDay = nestedData.length - DAYS_TO_START;
 
 				// console.log(nestedData);
@@ -146,129 +170,106 @@ function loadData() {
 	});
 }
 
+function updateChart(skip) {
+	const data = nestedData[currentDay];
+
+	$dayCounter.text(data.dateDisplay);
+
+	const rate = RATES[speedIndex];
+
+	// update data join
+	const $li = $rankList
+		.selectAll('li.person')
+		.data(data.values, d => d.article);
+
+	// exit
+	const $liExit = $li.exit();
+
+	$liExit
+		.classed('is-exit', true)
+		.transition()
+		.duration(skip ? 0 : 1000 * rate)
+		.ease(d3.easeCubicInOut)
+		.st('left', '0%')
+		.st('opacity', 0)
+		.remove();
+
+	// update
+	const updateDelay = 250 * rate;
+	$li
+		.classed('is-update', true)
+		.transition()
+		.delay(d => (skip ? 0 : 500 + d.rank_people * updateDelay * rate))
+		.duration(skip ? 0 : 1000 * rate)
+		.st('top', d => d.rank_people * personHeight);
+
+	// enter
+	const $liEnter = $li.enter().append('li.person');
+
+	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
+	$liEnter.append('span.name').text(d => d.name);
+
+	$liEnter
+		.classed('is-enter', true)
+		.st('background-color', d => d.color || '#efefef')
+		.st('opacity', 0)
+		.st('left', '100%')
+		.st('top', d => d.rank_people * personHeight);
+
+	// merge
+	const $liMerge = $liEnter.merge($li);
+
+	const mergeDelay = (500 + $li.size() * updateDelay) * rate;
+
+	$liMerge
+		.classed('is-merge', true)
+		.transition()
+		.delay(
+			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+		)
+		.duration(skip ? 0 : 1000 * rate)
+		.st('top', d => d.rank_people * personHeight)
+		.st('opacity', 1)
+		.st('left', '50%');
+
+	$liMerge
+		.select('.rank')
+		.transition()
+		.delay(
+			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+		)
+		.duration(skip ? 0 : 1000 * rate)
+		.text(d => zeroPad(d.rank_people + 1));
+}
+
 function advanceChart() {
-	if (autoplay && currentDay < nestedData.length - 2) {
-		// console.log(`advance chart fires, day ${currentDay}`);
+	if (timer) timer.stop();
+	timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
+	if (autoplay && !isSliding && currentDay < nestedData.length - 2) {
 		currentDay += 1;
 		$sliderNode.noUiSlider.set(currentDay);
 		updateChart(false);
 	}
 }
 
-function finishTransition() {
-	// console.log('finish transition fires');
-	timer = d3.timeout(advanceChart, transitionDuration);
-}
-
-function updateChart(skip) {
-	// console.log('chart updating');
-	const data = nestedData[currentDay];
-
-	$dayCounter.text(data.dateDisplay);
-
-	// Select pre-existing items
-
-	const $li = $rankList
-		.selectAll('li.person')
-		.data(data.values, d => d.article);
-
-	const mergeTransition = $enteredLi => {
-		// console.log('merged transition fires');
-		const $mergedLi = $enteredLi.merge($li);
-
-		let mergedDone = false;
-
-		$mergedLi
-			.text(d => `${d.rank_people + 1}. ${d.name}`)
-			.transition()
-			.duration(skip ? 0 : 500) // TODO
-			.st('top', d => d.rank_people * personHeight)
-			.st('left', '50%')
-			.on('end', () => {
-				if (!mergedDone) finishTransition();
-				mergedDone = true;
-			});
-	};
-
-	const enterTransition = () => {
-		// console.log('enter transition fires');
-		const $enteredLi = $li.enter().append('li.person');
-
-		$enteredLi.st('left', '100%').st('top', d => d.rank_people * personHeight);
-
-		mergeTransition($enteredLi);
-	};
-
-	const updateTransition = () => {
-		// console.log('update transition fires');
-		let updateCount = 0;
-
-		const updateSize = $li.size();
-		// console.log(`update size ${updateSize}`);
-
-		if (updateSize === 0) {
-			enterTransition();
-		} else {
-			$li
-				.transition()
-				.delay((d, i) => (skip ? 0 : d.rank_people * 200))
-				.duration(skip ? 0 : 500)
-				.st('top', d => d.rank_people * personHeight)
-				.on('end', () => {
-					updateCount += 1;
-					// console.log(`update count is ${updateCount}`);
-					// console.log(`update size is ${updateSize}`);
-					if (updateCount === updateSize) enterTransition();
-				});
-		}
-	};
-
-	const exitTransition = () => {
-		// console.log('exit transition fires');
-		let exitDone = false;
-
-		const $liExit = $li.exit();
-
-		// console.log(`exit array size ${$liExit.size()}`);
-		// console.log(`skip? ${skip}`);
-		if ($liExit.size() === 0) {
-			updateTransition();
-		} else {
-			$liExit
-				.transition()
-				.duration(skip ? 0 : 1000) // TODO
-				.ease(d3.easeCubicInOut)
-				.st('left', '0%') // TODO
-				.st('opacity', 0)
-				.on('end', () => {
-					// console.log(`is exit done? ${exitDone}`);
-					if (!exitDone) updateTransition();
-					exitDone = true;
-				})
-				.remove();
-		}
-	};
-
-	exitTransition();
-}
-
 function resize() {
 	// update height of ul
-	personHeight = 20;
+	personHeight = 48;
 	const height = NUM_PEOPLE * personHeight;
 	$rankList.st({
 		height
 	});
 }
 
-function init(dataPeople) {
-	// console.log(dataPeople)
+function init(people) {
+	peopleData = people;
 	resize();
 	loadData()
 		.then(() => {
 			setupNav();
 			updateChart();
 			setupSlider();
+			timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
 		})
 		.catch(console.log);
 }
