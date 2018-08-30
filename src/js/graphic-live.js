@@ -58,10 +58,6 @@ function setupNav() {
 }
 
 function handleEnd() {
-	if (!autoplay && isSliding) {
-		autoplay = true;
-		advanceChart();
-	}
 	isSliding = false;
 }
 
@@ -72,7 +68,6 @@ function handleSlide(value) {
 	if (+index < nestedData.length - 1) {
 		currentDay = +index;
 		updateChart(true);
-		autoplay = false;
 	}
 }
 
@@ -250,7 +245,7 @@ function updateChart(skip) {
 function advanceChart() {
 	if (timer) timer.stop();
 	timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
-	if (autoplay && currentDay < nestedData.length - 2) {
+	if (autoplay && !isSliding && currentDay < nestedData.length - 2) {
 		currentDay += 1;
 		$sliderNode.noUiSlider.set(currentDay);
 		updateChart(false);
