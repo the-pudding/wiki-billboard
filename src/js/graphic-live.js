@@ -145,7 +145,8 @@ function cleanData(data) {
 		rank_people: +person.rank_people,
 		views: +person.views,
 		dateString: person.date,
-		date: parseDate(person.date)
+		date: parseDate(person.date),
+		annotation: person.annotation
 	}));
 }
 
@@ -161,8 +162,6 @@ function loadData() {
 				nestedData = nestData();
 
 				currentDay = nestedData.length - DAYS_TO_START;
-
-				// console.log(nestedData);
 
 				resolve();
 			}
@@ -208,6 +207,7 @@ function updateChart(skip) {
 
 	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
 	$liEnter.append('span.name').text(d => d.name);
+	$liEnter.append('span.annotation');
 
 	$liEnter
 		.classed('is-enter', true)
@@ -240,6 +240,15 @@ function updateChart(skip) {
 		)
 		.duration(skip ? 0 : 1000 * rate)
 		.text(d => zeroPad(d.rank_people + 1));
+
+	$liMerge
+		.select('.annotation')
+		.transition()
+		.delay(
+			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+		)
+		.duration(skip ? 0 : 1000 * rate)
+		.text(d => d.annotation || '');
 }
 
 function advanceChart() {
