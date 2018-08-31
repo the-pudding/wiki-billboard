@@ -5,3 +5,4 @@ dev
 dist
 .tmp
 package-lock.json
+.vscode
