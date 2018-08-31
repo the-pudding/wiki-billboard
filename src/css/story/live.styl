@@ -12,16 +12,18 @@
 		margin-top 3rem
 	
 	li.person
-		display block
+		display flex
 		background-color $white
 		position absolute
 		font-size 20px
+		height 48px
+		border 1px solid white
 		line-height 1
-		padding 0.5rem
-		width 19rem
+		width 22rem
 		text-align left
 		transform translate(-50%, 0)
 		background-color $off-white
+		align-items center
 		&:after
 			display block
 			content '+'
@@ -32,6 +34,15 @@
 			font-weight 600
 			cursor pointer
 			color $fg
+		.thumbnail
+			display inline-block
+			width 46px
+			height 46px
+			background-repeat no-repeat
+			background-size cover
+			background-position center 25%
+			filter grayscale(50%)
+			margin-right 0.5rem
 		.rank
 			font-size 0.75em
 			margin-right 0.5em

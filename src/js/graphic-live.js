@@ -133,6 +133,11 @@ function getColor(article) {
 	return match ? colors[match.category] : null;
 }
 
+function getThumbnail(article) {
+	const match = peopleData.find(p => p.article === article);
+	return match ? match.thumbnail_source : null;
+}
+
 function cleanData(data) {
 	return data.map(person => ({
 		article: person.article,
@@ -142,6 +147,7 @@ function cleanData(data) {
 			ellipses: true
 		}),
 		color: getColor(person.article),
+		thumbnail: getThumbnail(person.article),
 		rank_people: +person.rank_people,
 		views: +person.views,
 		dateString: person.date,
@@ -205,6 +211,7 @@ function updateChart(skip) {
 	// enter
 	const $liEnter = $li.enter().append('li.person');
 
+	$liEnter.append('span.thumbnail').st('background-image', d => `url(${d.thumbnail})`);
 	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
 	$liEnter.append('span.name').text(d => d.name);
 	$liEnter.append('span.annotation');
