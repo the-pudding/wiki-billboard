@@ -220,7 +220,8 @@ function lastUpdated() {
 
 function updateChart(skip) {
 	const data = nestedData[currentDay];
-	d3.range(currentDay + 1, currentDay + 5).forEach(preload);
+
+	if (!skip) d3.range(currentDay + 1, currentDay + 5).forEach(preload);
 
 	$dayCounter.text(data.dateDisplay);
 
