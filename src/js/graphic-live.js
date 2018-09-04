@@ -283,6 +283,7 @@ function updateChart(skip) {
 		.html(EDIT_SVG);
 
 	$belowEnter.append('p.description').text(d => d.description);
+	$belowEnter.append('div.trend').text('~~ Tk trend chart here ~~');
 
 	$liEnter
 		.classed('is-enter', true)
