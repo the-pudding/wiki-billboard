@@ -18,6 +18,7 @@ let isSliding = false;
 
 const SPEEDS = [8000, 4000, 2000];
 const RATES = [1, 0.5, 0.25];
+const EDIT_SVG = '<polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon>';
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
@@ -26,8 +27,13 @@ const $sliderNode = $section.select('.live__slider').node();
 const $nav = $section.select('nav');
 const $autoplayButton = $nav.select('.btn--autoplay');
 const $speedButton = $nav.selectAll('.btn--speed');
-const $fastButton = $nav.select('.speed__fast');
-const $slowButton = $nav.select('.speed__slow');
+
+function getEditURL(d) {
+	const base =
+		'https://docs.google.com/forms/d/e/1FAIpQLSc_YJ5RxWSOuHnljC-0_igiaq_1HQs0NVM5I40AgXBjMI_vxA/viewform?usp=pp_url';
+	console.log(d.dateString);
+	return `${base}&entry.40479591=${d.article}&entry.789803485=${d.dateString}`;
+}
 
 function zeroPad(number) {
 	return d3.format('02')(number);
@@ -211,10 +217,21 @@ function updateChart(skip) {
 	// enter
 	const $liEnter = $li.enter().append('li.person');
 
-	$liEnter.append('span.thumbnail').st('background-image', d => `url(${d.thumbnail})`);
+	$liEnter
+		.append('span.thumbnail')
+		.st('background-image', d => `url(${d.thumbnail})`);
 	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
 	$liEnter.append('span.name').text(d => d.name);
 	$liEnter.append('span.annotation');
+
+	const $editEnter = $liEnter.append('a.edit').at('target', '_blank');
+
+	$editEnter
+		.append('svg')
+		.at('width', 24)
+		.at('height', 24)
+		.at('viewBox', '0 0 24 24')
+		.html(EDIT_SVG);
 
 	$liEnter
 		.classed('is-enter', true)
@@ -256,6 +273,8 @@ function updateChart(skip) {
 		)
 		.duration(skip ? 0 : 1000 * rate)
 		.text(d => d.annotation || '');
+
+	$liMerge.select('.edit').at('href', getEditURL);
 }
 
 function advanceChart() {

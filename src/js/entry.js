@@ -42,7 +42,7 @@ function init() {
 	// kick off graphic code
 
 	peopleData().then(dataPeople => {
-		console.table(dataPeople);
+		// console.table(dataPeople);
 		graphicLive.init(dataPeople);
 		graphicTally.init(dataPeople);
 	});
