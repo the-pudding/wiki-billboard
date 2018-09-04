@@ -1,6 +1,7 @@
 .intro
 	margin 0 auto
 	padding 4rem 1rem 1.5rem 1rem
+	padding-bottom 0
 
 	&__hed
 		max-width 60rem
@@ -28,25 +29,45 @@
 		set-type-size('medium', true)
 	
 	&__prelude
-		max-width 44rem
+		max-width 30rem
 		margin 0 auto
+	&__categories
+		display flex
+		flex-wrap wrap
+		justify-content center
+		max-width 40rem
+		margin 1rem auto
+		margin-top 1.5rem
+		margin-bottom 0
 		span
 			padding 0 0.5em
 			font-weight 600
+			border 2px solid $bg
 		.film
 			background-color $film
+			color darken($film, 60)
 		.sports
 			background-color $sports
+			color darken($sports, 60)
 		.music
 			background-color $music
+			color darken($music, 60)
 		.culture
 			background-color $culture
+			color darken($culture, 60)
 		.misc
 			background-color $misc
+			color darken($misc, 60)
 
-	time
-		background-color $gray-light
+	&__updated
+		display block
+		width 12rem
+		margin 1rem auto
+		margin-bottom 0.25rem
+		text-align center
+		border-bottom 2px solid $gray-dark
 		font-weight 600
-		font-size 0.75em
-		padding 0.25em 0.5em
+		set-type-size(x-small, false)
+		padding 0.5em 0
 		text-transform uppercase
+		letter-spacing 0.05em

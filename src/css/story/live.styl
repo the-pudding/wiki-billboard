@@ -13,16 +13,16 @@
 	
 	li.person
 		display flex
-		background-color $white
+		background-color $gray-dark
 		position absolute
 		font-size 20px
 		height 48px
-		border 1px solid white
+		border 2px solid $bg
+		border-radius 4px
 		line-height 1
 		width 22rem
 		text-align left
 		transform translate(-50%, 0)
-		background-color $off-white
 		align-items center
 		&:after
 			display none
@@ -36,13 +36,15 @@
 			color $fg
 		.thumbnail
 			display inline-block
-			width 46px
-			height 46px
+			width 44px
+			height 44px
 			background-repeat no-repeat
 			background-size cover
 			background-position center 25%
-			filter grayscale(50%)
+			filter grayscale(67%)
 			margin-right 0.5rem
+			border-top-left-radius 2px
+			border-bottom-left-radius 2px
 		.rank
 			font-size 0.75em
 			margin-right 0.5em
@@ -68,10 +70,11 @@
 				width 1.25rem
 				height 1.25rem
 				fill none 
-				stroke currentColor 
+				stroke $bg
 				stroke-width 2 
 				stroke-linecap round 
 				stroke-linejoin round 
+
 				
 	nav
 		margin-bottom 1.75rem

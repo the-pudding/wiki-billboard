@@ -1,7 +1,22 @@
 {
-  "film/tv/theater": "#dcb85d",
-  "sports": "#8dd171",
-  "music": "#66d5b0",
-  "culture": "#85bfef",
-  "misc": "#ed9ad0"
+  "film/tv/theater": {
+    "bg": "#dcb85d",
+    "fg": "#060401"
+  },
+  "sports": {
+    "bg": "#8dd171",
+    "fg": "#060c04"
+  },
+  "music": {
+    "bg": "#66d5b0",
+    "fg": "#020705"
+  },
+  "culture": {
+    "bg": "#85bfef",
+    "fg": "#08233a"
+  },
+  "misc": {
+    "bg": "#ed9ad0",
+    "fg": "#480d33"
+  }
 }

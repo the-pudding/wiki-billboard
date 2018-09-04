@@ -148,7 +148,7 @@ function nestData() {
 
 function getColor(article) {
 	const match = peopleData.find(p => p.article === article);
-	return match ? colors[match.category] : null;
+	return match ? colors[match.category] : { fg: '#333', bg: '#ccc' };
 }
 
 function getThumbnail(article) {
@@ -195,7 +195,7 @@ function loadData() {
 
 function lastUpdated() {
 	const last = nestedData[nestedData.length - 1];
-	d3.select('.intro__prelude time')
+	d3.select('.intro__updated time')
 		.text(last.dateDisplay)
 		.at('datetime', last.key);
 }
@@ -239,7 +239,7 @@ function updateChart(skip) {
 
 	$liEnter
 		.append('span.thumbnail')
-		.st('background-color', d => darkenColor(d.color) || '#efefef')
+		.st('background-color', d => darkenColor(d.color.bg))
 		.st('background-image', d => `url(${d.thumbnail})`);
 	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
 	$liEnter.append('span.name').text(d => d.name);
@@ -248,7 +248,7 @@ function updateChart(skip) {
 	const $editEnter = $liEnter
 		.append('a.edit')
 		.at('target', '_blank')
-		.at('title', d => `Add an annotation for ${d.name}`);
+		.at('title', d => `Help us by suggesting an annotation for ${d.name}`);
 
 	$editEnter
 		.append('svg')
@@ -259,7 +259,8 @@ function updateChart(skip) {
 
 	$liEnter
 		.classed('is-enter', true)
-		.st('background-color', d => d.color || '#efefef')
+		.st('background-color', d => d.color.bg)
+		.st('color', d => d.color.fg)
 		.st('opacity', 0)
 		.st('left', '100%')
 		.st('top', d => d.rank_people * personHeight);
