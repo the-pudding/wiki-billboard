@@ -2,6 +2,7 @@
 import * as noUiSlider from 'nouislider';
 import truncate from './utils/truncate';
 import colors from './colors.json';
+import preloadImage from './preload-image';
 
 const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
@@ -28,10 +29,14 @@ const $nav = $section.select('nav');
 const $autoplayButton = $nav.select('.btn--autoplay');
 const $speedButton = $nav.selectAll('.btn--speed');
 
+function darkenColor(hex) {
+	const c = d3.color(hex);
+	return c.darker().toString();
+}
+
 function getEditURL(d) {
 	const base =
 		'https://docs.google.com/forms/d/e/1FAIpQLSc_YJ5RxWSOuHnljC-0_igiaq_1HQs0NVM5I40AgXBjMI_vxA/viewform?usp=pp_url';
-	console.log(d.dateString);
 	return `${base}&entry.40479591=${d.article}&entry.789803485=${d.dateString}`;
 }
 
@@ -116,6 +121,13 @@ function setupSlider() {
 	slider.on('end', handleEnd);
 }
 
+function preload(index) {
+	if (index < nestedData.length - 1) {
+		const images = nestedData[index].values.map(d => d.thumbnail);
+		images.forEach(preloadImage);
+	}
+}
+
 function parseDate(date) {
 	const dates = date.split('-').map(d => +d);
 	return new Date(dates[0], dates[1] - 1, dates[2]);
@@ -181,8 +193,16 @@ function loadData() {
 	});
 }
 
+function lastUpdated() {
+	const last = nestedData[nestedData.length - 1];
+	d3.select('.intro__prelude time')
+		.text(last.dateDisplay)
+		.at('datetime', last.key);
+}
+
 function updateChart(skip) {
 	const data = nestedData[currentDay];
+	d3.range(currentDay + 1, currentDay + 5).forEach(preload);
 
 	$dayCounter.text(data.dateDisplay);
 
@@ -219,12 +239,16 @@ function updateChart(skip) {
 
 	$liEnter
 		.append('span.thumbnail')
+		.st('background-color', d => darkenColor(d.color) || '#efefef')
 		.st('background-image', d => `url(${d.thumbnail})`);
 	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
 	$liEnter.append('span.name').text(d => d.name);
 	$liEnter.append('span.annotation');
 
-	const $editEnter = $liEnter.append('a.edit').at('target', '_blank');
+	const $editEnter = $liEnter
+		.append('a.edit')
+		.at('target', '_blank')
+		.at('title', d => `Add an annotation for ${d.name}`);
 
 	$editEnter
 		.append('svg')
@@ -301,8 +325,10 @@ function init(people) {
 	resize();
 	loadData()
 		.then(() => {
+			preload(currentDay);
 			setupNav();
 			updateChart();
+			lastUpdated();
 			setupSlider();
 			timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
 		})
