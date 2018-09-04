@@ -44,6 +44,19 @@ function zeroPad(number) {
 	return d3.format('02')(number);
 }
 
+function handleNameClick() {
+	const $p = d3
+		.select(this)
+		.parent()
+		.parent();
+
+	const below = $p.classed('is-below');
+
+	$rankList.selectAll('.person').classed('is-below', false);
+
+	$p.classed('is-below', !below).raise();
+}
+
 function handleSpeedToggle() {
 	speedIndex = +$speedButton.text().replace('x', '') - 1;
 	speedIndex += 1;
@@ -146,32 +159,37 @@ function nestData() {
 		}));
 }
 
-function getColor(article) {
-	const match = peopleData.find(p => p.article === article);
-	return match ? colors[match.category] : { fg: '#333', bg: '#ccc' };
-}
-
-function getThumbnail(article) {
-	const match = peopleData.find(p => p.article === article);
-	return match ? match.thumbnail_source : null;
+function getPerson(article) {
+	return peopleData.find(p => p.article === article);
 }
 
 function cleanData(data) {
-	return data.map(person => ({
-		article: person.article,
-		name: truncate({
-			text: person.article.replace(/_/g, ' '),
-			chars: 22,
-			ellipses: true
-		}),
-		color: getColor(person.article),
-		thumbnail: getThumbnail(person.article),
-		rank_people: +person.rank_people,
-		views: +person.views,
-		dateString: person.date,
-		date: parseDate(person.date),
-		annotation: person.annotation
-	}));
+	return data.map(person => {
+		const match = getPerson(person.article);
+		return {
+			article: person.article,
+			name: truncate({
+				text: person.article.replace(/_/g, ' '),
+				chars: 21,
+				clean: false,
+				ellipses: true
+			}),
+			rank_people: +person.rank_people,
+			views: +person.views,
+			dateString: person.date,
+			date: parseDate(person.date),
+			annotation: person.annotation,
+			color: match ? colors[match.category] : { fg: '#333', bg: '#ccc' },
+			thumbnail: match ? match.thumbnail_source : null,
+			description: match
+				? truncate({
+					text: match.description,
+					chars: 35,
+					ellipses: true
+				  })
+				: ''
+		};
+	});
 }
 
 function loadData() {
@@ -229,6 +247,7 @@ function updateChart(skip) {
 	const updateDelay = 250 * rate;
 	$li
 		.classed('is-update', true)
+		.classed('is-below', false)
 		.transition()
 		.delay(d => (skip ? 0 : 500 + d.rank_people * updateDelay * rate))
 		.duration(skip ? 0 : 1000 * rate)
@@ -237,15 +256,21 @@ function updateChart(skip) {
 	// enter
 	const $liEnter = $li.enter().append('li.person');
 
-	$liEnter
+	const $aboveEnter = $liEnter.append('div.above');
+	const $belowEnter = $liEnter.append('div.below');
+
+	$aboveEnter
 		.append('span.thumbnail')
 		.st('background-color', d => darkenColor(d.color.bg))
 		.st('background-image', d => `url(${d.thumbnail})`);
-	$liEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
-	$liEnter.append('span.name').text(d => d.name);
-	$liEnter.append('span.annotation');
+	$aboveEnter.append('span.rank').text(d => zeroPad(d.rank_people + 1));
+	$aboveEnter
+		.append('span.name')
+		.text(d => d.name)
+		.on('click', handleNameClick);
+	$aboveEnter.append('span.annotation');
 
-	const $editEnter = $liEnter
+	const $editEnter = $aboveEnter
 		.append('a.edit')
 		.at('target', '_blank')
 		.at('title', d => `Help us by suggesting an annotation for ${d.name}`);
@@ -256,6 +281,8 @@ function updateChart(skip) {
 		.at('height', 24)
 		.at('viewBox', '0 0 24 24')
 		.html(EDIT_SVG);
+
+	$belowEnter.append('p.description').text(d => d.description);
 
 	$liEnter
 		.classed('is-enter', true)

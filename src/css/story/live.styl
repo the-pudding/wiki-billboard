@@ -12,32 +12,25 @@
 		margin-top 3rem
 	
 	li.person
-		display flex
 		background-color $gray-dark
 		position absolute
 		font-size 20px
-		height 48px
+		height $person-height
+		overflow hidden
 		border 2px solid $bg
 		border-radius 4px
 		line-height 1
 		width 22rem
 		text-align left
 		transform translate(-50%, 0)
-		align-items center
-		&:after
-			display none
-			content '+'
-			position absolute
-			top 25%
-			right 0.5rem
-			line-height 1
-			font-weight 600
-			cursor pointer
-			color $fg
+		.above
+			display flex
+			align-items center
+
 		.thumbnail
 			display inline-block
-			width 44px
-			height 44px
+			width $person-height - 4px
+			height $person-height - 4px
 			background-repeat no-repeat
 			background-size cover
 			background-position center 25%
@@ -50,6 +43,18 @@
 			margin-right 0.5em
 		.name
 			font-weight 600
+			position relative
+			cursor pointer
+			&:after
+				display block
+				content '+'
+				position absolute
+				top 0
+				right -1rem
+				line-height 1
+				font-weight 600
+				color currentColor
+				opacity 0.67
 		.annotation
 			position absolute
 			display block
@@ -61,6 +66,7 @@
 			set-type-size(x-small, true)
 		
 		.edit
+			opacity 0.67
 			position absolute
 			top 50%
 			right 0.5em
@@ -74,6 +80,18 @@
 				stroke-width 2 
 				stroke-linecap round 
 				stroke-linejoin round 
+
+		&.is-below
+			height $person-height * 3
+			.name:after
+				content '-'
+
+		.below
+			padding 0.5rem
+			.description
+				margin 0
+				set-type-size(small, true)
+
 
 				
 	nav
