@@ -1,10 +1,8 @@
 {
-  "title": "Title Case Headline Goes Here",
-  "description": "Your dek goes here. It is probably one or two sentences that succinctly describe more explicitly what the story will be about.",
-  "url": "https://pudding.cool/year/month/name/",
-  "keywords": "tk",
-  "imgFacebook": "https://pudding.cool/year/month/name/assets/social/social-facebook.jpg",
-  "imgTwitter": "https://pudding.cool/year/month/name/assets/social/social-twitter.jpg",
+  "url": "https://pudding.cool/2018/09/wiki-billboard/",
+  "keywords": "wikipedia, celebrities, billboard",
+  "imgFacebook": "https://pudding.cool/2018/09/wiki-billboard/assets/social/social-facebook.jpg",
+  "imgTwitter": "https://pudding.cool/2018/09/wiki-billboard/assets/social/social-twitter.jpg",
   "author": {
     "name": "Russell Goldenberg",
     "url": "https://pudding.cool/author/russell-goldenberg"
