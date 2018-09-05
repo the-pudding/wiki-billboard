@@ -6,20 +6,20 @@
   "imgFacebook": "https://pudding.cool/year/month/name/assets/social/social-facebook.jpg",
   "imgTwitter": "https://pudding.cool/year/month/name/assets/social/social-twitter.jpg",
   "author": {
-    "name": "Ilia Blinderman",
-    "url": "https://pudding.cool/author/ilia-blinderman"
-  },
-  "author2": {
-    "name": "Caitlyn Ralph",
-    "url": "https://pudding.cool/author/caitlyn-ralph"
-  },
-  "author3": {
     "name": "Russell Goldenberg",
     "url": "https://pudding.cool/author/russell-goldenberg"
   },
+  "author2": {
+    "name": "Ilia Blinderman",
+    "url": "https://pudding.cool/author/ilia-blinderman"
+  },
+  "author3": {
+    "name": "Caitlyn Ralph",
+    "url": "https://pudding.cool/author/caitlyn-ralph"
+  },
   "author4": {
-    "name": "Someone Else",
-    "url": "https://twitter.com/puddingviz"
+    "name": "Adrián Blanco",
+    "url": "https://twitter.com/AdrianBlancoR"
   },
   "analytics": ""
 }

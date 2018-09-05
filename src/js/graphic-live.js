@@ -6,12 +6,14 @@ import preloadImage from './preload-image';
 
 const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
+const BP = 640;
 
 let cleanedData = [];
 let nestedData = [];
 let peopleData = [];
 let currentDay = 0;
 let personHeight = 0;
+let mobile = false;
 let timer = null;
 let autoplay = true;
 let speedIndex = 0;
@@ -327,7 +329,10 @@ function updateChart(skip) {
 		.duration(skip ? 0 : 1000 * rate)
 		.text(d => d.annotation || '');
 
-	$liMerge.select('.edit').at('href', getEditURL);
+	$liMerge
+		.select('.edit')
+		.at('href', getEditURL)
+		.classed('is-transparent', d => d.annotation);
 }
 
 function advanceChart() {
@@ -342,7 +347,9 @@ function advanceChart() {
 
 function resize() {
 	// update height of ul
-	personHeight = 48;
+	mobile = $section.node().offsetWidth < BP;
+	const fs = mobile ? 14 : 20;
+	personHeight = fs * 2 + 4;
 	const height = NUM_PEOPLE * personHeight;
 	$rankList.st({
 		height

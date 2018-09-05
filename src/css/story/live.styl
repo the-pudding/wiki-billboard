@@ -16,23 +16,27 @@
 	li.person
 		background-color $gray-dark
 		position absolute
-		font-size 20px
-		height $person-height
+		font-size 14px
+		height $person-height--mobile
 		overflow hidden
 		border 2px solid $bg
 		border-radius 4px
 		line-height 1
-		width 22rem
+		width 16rem
 		text-align left
 		transform translate(-50%, 0)
+		+mq('bp-4')
+			width 22rem
+			font-size 20px
+			height $person-height
 		.above
 			display flex
 			align-items center
 
 		.thumbnail
 			display inline-block
-			width $person-height - 4px
-			height $person-height - 4px
+			width $person-height--mobile - 4px
+			height $person-height--mobile - 4px
 			background-repeat no-repeat
 			background-size cover
 			background-position center 25%
@@ -40,6 +44,9 @@
 			margin-right 0.5rem
 			border-top-left-radius 2px
 			border-bottom-left-radius 2px
+			+mq('bp-4')
+				width $person-height - 4px
+				height $person-height - 4px
 		.rank
 			font-size 0.75em
 			margin-right 0.5em
@@ -74,6 +81,12 @@
 			right 0.5em
 			border none
 			transform translate(0, -50%)
+			display none
+			transition opacity 250ms
+			&.is-transparent
+				opacity 0
+			+mq('bp-4')
+				display block
 			svg
 				width 1.25rem
 				height 1.25rem
@@ -84,7 +97,9 @@
 				stroke-linejoin round 
 
 		&.is-below
-			height $person-height * 3
+			height $person-height--mobile * 3
+			+mq('bp-4')
+				height $person-height * 3
 			.name:after
 				content '-'
 
