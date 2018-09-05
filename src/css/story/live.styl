@@ -14,13 +14,11 @@
 		margin-top 3rem
 	
 	li.person
-		background-color $gray-dark
+		// background-color $gray-dark
 		position absolute
 		font-size 14px
 		height $person-height--mobile
-		overflow hidden
 		border 2px solid $bg
-		border-radius 4px
 		line-height 1
 		width 16rem
 		text-align left
@@ -42,8 +40,6 @@
 			background-position center 25%
 			filter grayscale(67%)
 			margin-right 0.5rem
-			border-top-left-radius 2px
-			border-bottom-left-radius 2px
 			+mq('bp-4')
 				width $person-height - 4px
 				height $person-height - 4px
@@ -98,6 +94,8 @@
 
 		&.is-below
 			height $person-height--mobile * 3
+			.below
+				display block
 			+mq('bp-4')
 				height $person-height * 3
 			.name:after
@@ -105,15 +103,22 @@
 
 		.below
 			padding 0.5rem
+			display none
 			.description
 				margin 0
+				font-weight 500
 				set-type-size(small, true)
 			
 			.trend
-				margin-top 1.5rem
-				set-type-size(small, true)
+				margin-top 0.5rem
+				width 100%
+				height $person-height
 
-
+		path
+			fill none
+		
+		circle
+			// fill $black
 				
 	nav
 		margin-bottom 1.75rem

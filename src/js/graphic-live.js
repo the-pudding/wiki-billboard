@@ -7,9 +7,12 @@ import preloadImage from './preload-image';
 const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
 const BP = 640;
+const MS_DAY = 86400000;
+const MARGIN = 5;
 
 let cleanedData = [];
 let nestedData = [];
+let nestedDataAll = [];
 let peopleData = [];
 let currentDay = 0;
 let personHeight = 0;
@@ -18,6 +21,8 @@ let timer = null;
 let autoplay = true;
 let speedIndex = 0;
 let isSliding = false;
+let svgWidth = 0;
+let maxRank = 0;
 
 const SPEEDS = [8000, 4000, 2000];
 const RATES = [1, 0.5, 0.25];
@@ -30,6 +35,19 @@ const $sliderNode = $section.select('.live__slider').node();
 const $nav = $section.select('nav');
 const $autoplayButton = $nav.select('.btn--autoplay');
 const $speedButton = $nav.selectAll('.btn--speed');
+
+function generateRangeOfDays({ start, end }) {
+	const diff = Math.floor((end - start) / MS_DAY) + 1;
+	let cur = start.getTime();
+	return d3.range(diff).map(i => {
+		const date = new Date(cur);
+		const dateString = `${date.getFullYear()}-${zeroPad(
+			date.getMonth() + 1
+		)}-${zeroPad(date.getDate())}`;
+		cur += MS_DAY;
+		return { date, dateString };
+	});
+}
 
 function darkenColor(hex) {
 	const c = d3.color(hex);
@@ -57,6 +75,8 @@ function handleNameClick() {
 	$rankList.selectAll('.person').classed('is-below', false);
 
 	$p.classed('is-below', !below).raise();
+
+	if (!below && autoplay) handleAutoplayToggle();
 }
 
 function handleSpeedToggle() {
@@ -148,11 +168,11 @@ function parseDate(date) {
 	return new Date(dates[0], dates[1] - 1, dates[2]);
 }
 
-function nestData() {
+function nestAppearance(data) {
 	return d3
 		.nest()
 		.key(d => d.dateString)
-		.entries(cleanedData)
+		.entries(data)
 		.map(d => ({
 			...d,
 			dateDisplay: parseDate(d.key)
@@ -161,11 +181,27 @@ function nestData() {
 		}));
 }
 
+function nestAll(data) {
+	return d3
+		.nest()
+		.key(d => d.article)
+		.entries(data);
+}
+
 function getPerson(article) {
 	return peopleData.find(p => p.article === article);
 }
 
-function cleanData(data) {
+function cleanAll(data) {
+	return data.map(person => ({
+		article: person.article,
+		rank_people: +person.rank_people,
+		dateString: person.date,
+		date: parseDate(person.date)
+	}));
+}
+
+function cleanAppearance(data) {
 	return data.map(person => {
 		const match = getPerson(person.article);
 		return {
@@ -194,7 +230,22 @@ function cleanData(data) {
 	});
 }
 
-function loadData() {
+function loadAllData() {
+	const timeStamped = Date.now();
+	const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--all.csv?version=${timeStamped}`;
+
+	d3.loadData(dataURL, (error, response) => {
+		if (error) console.log(error);
+		else {
+			const clean = cleanAll(response[0]);
+			nestedDataAll = nestAll(clean);
+			maxRank = d3.max(clean, d => d.rank_people);
+			$rankList.selectAll('.person').each(updateTrend);
+		}
+	});
+}
+
+function loadAppearanceData() {
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;
@@ -202,8 +253,8 @@ function loadData() {
 		d3.loadData(dataURL, (error, response) => {
 			if (error) reject(error);
 			else {
-				cleanedData = cleanData(response[0]);
-				nestedData = nestData();
+				cleanedData = cleanAppearance(response[0]);
+				nestedData = nestAppearance(cleanedData);
 
 				currentDay = nestedData.length - DAYS_TO_START;
 
@@ -218,6 +269,56 @@ function lastUpdated() {
 	d3.select('.intro__updated time')
 		.text(last.dateDisplay)
 		.at('datetime', last.key);
+}
+
+function updateTrend({ article }) {
+	if (!nestedDataAll.length) return false;
+	const match = nestedDataAll.find(d => d.key === article);
+	if (!match) return false;
+
+	const start = parseDate('2018-01-01');
+	const end = parseDate('2018-12-31');
+
+	const days = generateRangeOfDays({ start, end });
+	const data = days.filter((d, i) => i <= currentDay).map(d => {
+		const m = match.values.find(v => v.dateString === d.dateString);
+		return {
+			...d,
+			rank_people: m ? m.rank_people : maxRank
+		};
+	});
+
+	const scaleX = d3
+		.scaleTime()
+		.domain([start, end])
+		.range([0, svgWidth - MARGIN * 2]);
+
+	const scaleY = d3
+		.scaleTime()
+		.domain([0, maxRank])
+		.range([0, personHeight - MARGIN * 2]);
+
+	const line = d3
+		.line()
+		.x(d => scaleX(d.date))
+		.y(d => scaleY(d.rank_people));
+
+	const $path = d3.select(this).select('.g-vis path');
+	$path.at('d', line(data));
+
+	d3.select(this)
+		.select('svg')
+		.at('width', svgWidth)
+		.at('height', personHeight);
+
+	d3.select(this)
+		.select('.g-vis')
+		.at('transform', `translate(${MARGIN}, ${MARGIN})`);
+
+	d3.select(this)
+		.select('.g-vis circle')
+		.at('cx', scaleX(data[currentDay].date))
+		.at('cy', scaleY(data[currentDay].rank_people));
 }
 
 function updateChart(skip) {
@@ -259,8 +360,14 @@ function updateChart(skip) {
 	// enter
 	const $liEnter = $li.enter().append('li.person');
 
+	$liEnter.st('background-color', d => d.color.fg);
+
 	const $aboveEnter = $liEnter.append('div.above');
 	const $belowEnter = $liEnter.append('div.below');
+
+	$aboveEnter
+		.st('background-color', d => d.color.bg)
+		.st('color', d => d.color.fg);
 
 	$aboveEnter
 		.append('span.thumbnail')
@@ -285,13 +392,22 @@ function updateChart(skip) {
 		.at('viewBox', '0 0 24 24')
 		.html(EDIT_SVG);
 
+	$belowEnter
+		.st('background-color', d => d.color.fg)
+		.st('color', d => d.color.bg);
+
 	$belowEnter.append('p.description').text(d => d.description);
-	$belowEnter.append('div.trend').text('~~ Tk trend chart here ~~');
+	const $svgEnter = $belowEnter.append('svg.trend');
+	$svgEnter.append('g.g-axis');
+	const $visEnter = $svgEnter.append('g.g-vis');
+	$visEnter.append('path').st('stroke', d => d.color.bg);
+	$visEnter
+		.append('circle')
+		.at('r', 3)
+		.st('fill', d => d.color.bg);
 
 	$liEnter
 		.classed('is-enter', true)
-		.st('background-color', d => d.color.bg)
-		.st('color', d => d.color.fg)
 		.st('opacity', 0)
 		.st('left', '100%')
 		.st('top', d => d.rank_people * personHeight);
@@ -333,6 +449,9 @@ function updateChart(skip) {
 		.select('.edit')
 		.at('href', getEditURL)
 		.classed('is-transparent', d => d.annotation);
+
+	svgWidth = $liMerge.node().offsetWidth;
+	$liMerge.each(updateTrend);
 }
 
 function advanceChart() {
@@ -349,8 +468,8 @@ function resize() {
 	// update height of ul
 	mobile = $section.node().offsetWidth < BP;
 	const fs = mobile ? 14 : 20;
-	personHeight = fs * 2 + 4;
-	const height = NUM_PEOPLE * personHeight;
+	personHeight = fs * 2 + 8;
+	const height = (NUM_PEOPLE + 2) * personHeight;
 	$rankList.st({
 		height
 	});
@@ -359,7 +478,7 @@ function resize() {
 function init(people) {
 	peopleData = people;
 	resize();
-	loadData()
+	loadAppearanceData()
 		.then(() => {
 			preload(currentDay);
 			setupNav();
@@ -367,6 +486,7 @@ function init(people) {
 			lastUpdated();
 			setupSlider();
 			timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
+			loadAllData();
 		})
 		.catch(console.log);
 }
