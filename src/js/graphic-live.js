@@ -245,12 +245,12 @@ function updateChart(skip) {
 		.remove();
 
 	// update
-	const updateDelay = 250 * rate;
+	const updateDelay = 250;
 	$li
 		.classed('is-update', true)
 		.classed('is-below', false)
 		.transition()
-		.delay(d => (skip ? 0 : 500 + d.rank_people * updateDelay * rate))
+		.delay(d => (skip ? 0 : d.rank_people * updateDelay * rate))
 		.duration(skip ? 0 : 1000 * rate)
 		.st('top', d => d.rank_people * personHeight);
 
@@ -297,13 +297,12 @@ function updateChart(skip) {
 	// merge
 	const $liMerge = $liEnter.merge($li);
 
-	const mergeDelay = (500 + $li.size() * updateDelay) * rate;
-
+	const mergeDelay = (1000 + $li.size() * updateDelay) * rate;
 	$liMerge
 		.classed('is-merge', true)
 		.transition()
 		.delay(
-			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+			d => (skip ? 0 : mergeDelay + ((d.rank_people * updateDelay) / 2) * rate)
 		)
 		.duration(skip ? 0 : 1000 * rate)
 		.st('top', d => d.rank_people * personHeight)
@@ -314,7 +313,7 @@ function updateChart(skip) {
 		.select('.rank')
 		.transition()
 		.delay(
-			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+			d => (skip ? 0 : mergeDelay + ((d.rank_people * updateDelay) / 2) * rate)
 		)
 		.duration(skip ? 0 : 1000 * rate)
 		.text(d => zeroPad(d.rank_people + 1));
@@ -323,7 +322,7 @@ function updateChart(skip) {
 		.select('.annotation')
 		.transition()
 		.delay(
-			d => (skip ? 0 : (mergeDelay + (d.rank_people * updateDelay) / 2) * rate)
+			d => (skip ? 0 : mergeDelay + ((d.rank_people * updateDelay) / 2) * rate)
 		)
 		.duration(skip ? 0 : 1000 * rate)
 		.text(d => d.annotation || '');

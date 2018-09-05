@@ -4,6 +4,7 @@ import isMobile from './utils/is-mobile';
 import graphicLive from './graphic-live';
 import graphicTally from './graphic-tally';
 import peopleData from './people-data';
+import footer from './footer';
 
 const $body = d3.select('body');
 let previousWidth = 0;
@@ -39,8 +40,11 @@ function init() {
 	window.addEventListener('resize', debounce(resize, 150));
 	// setup sticky header menu
 	setupStickyHeader();
-	// kick off graphic code
 
+	// footer async load
+	footer();
+
+	// kick off graphic code
 	peopleData().then(dataPeople => {
 		// console.table(dataPeople);
 		graphicLive.init(dataPeople);
