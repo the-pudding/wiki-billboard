@@ -1,6 +1,6 @@
 <footer class='tk-atlas'>
-	<div class='credits'>
-			<p class='credits__byline tk-atlas'>By
+	<div class='outro'>
+			<p class='outro__byline tk-atlas'>By
 				<a href='{{meta.author.url}}' target='_blank'>
 					<strong>{{meta.author.name}}</strong>
 				</a>, <a href='{{meta.author2.url}}' target='_blank'>
@@ -9,8 +9,14 @@
 					<strong>{{meta.author3.name}}</strong>
 				</a>, and <a href='{{meta.author4.url}}' target='_blank'>
 					<strong>{{meta.author4.name}}</strong>
-				</a>.
+				</a>. For questions, comments, etc., hit us up at sup@pudding.cool.
 			</p>
+			<div class='outro__method'>
+				<p><strong>Data and Methods</strong></p>
+				{{#each copy.method}}
+				<p>{{{value}}}</p>
+				{{/each}}
+			</div>
 	</div>
 	<div class="patreon">
 		<p class="patreon__content">
@@ -22,7 +28,7 @@
 	</div>
 
 	<div class="recirc">
-		<p class="recirc__hed">More 🔥 Stuff</p>
+		<p class="recirc__hed">Hot Takes, Cool Viz</p>
 		<ul class="recirc__articles">
 			<li>
 				<a onclick="trackOutboundLink('https://pudding.cool/2018/08/wiki-death/'); return false;" href="https://pudding.cool/2018/08/wiki-death/"
@@ -134,7 +140,7 @@
 			</div>
 		</div>
 		<div class="company__trademark">
-			<p class="footer__location xx-small tk-atlas">The Pudding<span>®</span> is made in Brooklyn, NY; Seattle, WA; and Great
+			<p class="footer__location xx-small tk-atlas">The Pudding<span>®</span> is made in Brooklyn, NY; Seattle, WA; San Antonio, TX; and Great
 				Barrington, MA.</p>
 		</div>
 	</div>

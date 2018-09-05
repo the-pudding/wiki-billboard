@@ -143,6 +143,7 @@
 			set-type-size(small, false)
 
 	.live__date-counter
+		display none
 		position absolute
 		top 50%
 		left 12.5%
@@ -152,3 +153,9 @@
 		font-weight 300
 		width 5rem
 		transform translate(-50%, -50%)
+		+mq('bp-4')
+			display block
+	
+	.live__slider
+		max-width 90%
+		margin 0 auto

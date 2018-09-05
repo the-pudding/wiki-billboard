@@ -1,11 +1,13 @@
 footer
 	margin-bottom 3rem
-	.credits
-		&__byline
-			max-width $column-width
-			margin 0 auto
-			padding 1rem
+	.outro
+		max-width 34rem
+		margin 2rem auto
+		p
 			set-type-size('small', true)
+		&__byline
+			margin 0 auto
+			
 	.patreon
 		display flex
 		margin 0 auto
@@ -22,7 +24,7 @@ footer
 				width calc(100% - 16rem)
 				margin 0 auto
 		a
-			background $gray-light
+			background $white
 			border-radius 3px
 			padding 1rem
 			color $bg
@@ -48,7 +50,7 @@ footer
 		letter-spacing 1px
 		border-bottom none
 		color $white
-		width 20rem
+		max-width 20rem
 		margin 1rem auto
 		font-weight 600
 
@@ -58,7 +60,6 @@ footer
 	
 		li
 			width 100%
-			padding 1rem
 			margin-top 2px
 			&:nth-child(1)
 				background-color $film
@@ -80,29 +81,37 @@ footer
 				background-color $misc
 				a
 					color darken($misc, 60)
+			+mq('bp-4')
+				padding 1rem
 		a
-			set-type-size(x-large)
+			set-type-size(medium)
 			border-bottom none
 			font-weight 600
 			display block
 			display flex
 			align-items center
 			justify-content space-between
+			+mq('bp-4')
+				set-type-size(x-large)
 		span
 			margin 1rem	
 		video
-			display block
+			display none
 			width 15rem
 			margin 1rem
+			+mq('bp-4')
+				display block
 
 
 	.company__wrapper
 		display flex
-		flex-wrap nowrap
 		justify-content center
 		max-width 60rem
 		margin 3rem auto
 		font-weight 500
+		flex-wrap wrap
+		+mq('bp-4')
+			flex-wrap nowrap
 		.company__left, .company__right
 			max-width 25em
 			padding 0 1em
@@ -112,6 +121,9 @@ footer
 		.company__right
 			text-align center
 			font-weight 500
+			margin-top 1rem
+			+mq('bp-4')
+				margin-top 0
 
 			ul
 				font-weight 400
