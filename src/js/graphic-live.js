@@ -28,6 +28,7 @@ let timer = null;
 let autoplay = true;
 let speedIndex = 0;
 let isSliding = false;
+let isBelow = false;
 let svgWidth = 0;
 let maxRank = 0;
 
@@ -83,7 +84,8 @@ function handleNameClick() {
 
 	$p.classed('is-below', !below).raise();
 
-	if (!below && autoplay) handleAutoplayToggle();
+	isBelow = !below;
+	handleAutoplayToggle();
 }
 
 function handleSpeedToggle() {
@@ -94,19 +96,21 @@ function handleSpeedToggle() {
 	$speedButton.text(`${speedIndex + 1}x`);
 	advanceChart();
 }
-
 function handleAutoplayToggle() {
-	autoplay = !autoplay;
 	$autoplayButton
-		.text(autoplay ? 'Pause' : 'Play')
-		.at('alt', autoplay ? 'Pause animation' : 'Play animation');
+		.text(autoplay && !isBelow ? 'Pause' : 'Play')
+		.at('alt', autoplay && !isBelow ? 'Pause animation' : 'Play animation');
 
 	if (autoplay) advanceChart();
 	else if (timer) timer.stop();
 }
 
 function setupNav() {
-	$autoplayButton.on('click', handleAutoplayToggle);
+	$autoplayButton.on('click', () => {
+		if (!isBelow) autoplay = !autoplay;
+		else if (autoplay && isBelow) isBelow = false;
+		handleAutoplayToggle();
+	});
 	$speedButton.on('click', handleSpeedToggle);
 }
 
@@ -319,7 +323,7 @@ function updateTrend({ article }) {
 		.y1(d => scaleY(d.rank_people));
 
 	const $svg = d3.select(this).select('svg.trend');
-	console.log({personHeight})
+
 	$svg.at('width', svgWidth).at('height', personHeight * 2);
 
 	const $gVis = $svg.select('.g-vis');
@@ -363,6 +367,7 @@ function updateTrend({ article }) {
 }
 
 function updateChart(skip) {
+	isBelow = false;
 	const data = nestedData[currentDay];
 
 	if (!skip) d3.range(currentDay + 1, currentDay + 5).forEach(preload);
@@ -519,7 +524,12 @@ function updateChart(skip) {
 function advanceChart() {
 	if (timer) timer.stop();
 	timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
-	if (autoplay && !isSliding && currentDay < nestedData.length - 2) {
+	if (
+		autoplay &&
+		!isSliding &&
+		!isBelow &&
+		currentDay < nestedData.length - 2
+	) {
 		currentDay += 1;
 		$sliderNode.noUiSlider.set(currentDay);
 		updateChart(false);
