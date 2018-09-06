@@ -8,7 +8,14 @@ const DAYS_TO_START = 31;
 const NUM_PEOPLE = 10;
 const BP = 640;
 const MS_DAY = 86400000;
-const MARGIN = 5;
+const AXIS_FONT_SIZE = 12;
+const REM = 16;
+const MARGIN = {
+	top: AXIS_FONT_SIZE * 1.25,
+	right: 3,
+	bottom: AXIS_FONT_SIZE * 1.25,
+	left: 3
+};
 
 let cleanedData = [];
 let nestedData = [];
@@ -291,34 +298,68 @@ function updateTrend({ article }) {
 	const scaleX = d3
 		.scaleTime()
 		.domain([start, end])
-		.range([0, svgWidth - MARGIN * 2]);
+		.range([0, svgWidth - MARGIN.left - MARGIN.right]);
 
 	const scaleY = d3
 		.scaleTime()
 		.domain([0, maxRank])
-		.range([0, personHeight - MARGIN * 2]);
+		.range([0, personHeight * 2 - MARGIN.top - MARGIN.bottom]);
 
 	const line = d3
 		.line()
+		.curve(d3.curveMonotoneX)
 		.x(d => scaleX(d.date))
 		.y(d => scaleY(d.rank_people));
 
-	const $path = d3.select(this).select('.g-vis path');
-	$path.at('d', line(data));
+	const area = d3
+		.area()
+		.curve(d3.curveMonotoneX)
+		.x(d => scaleX(d.date))
+		.y0(d => scaleY(maxRank) + 1)
+		.y1(d => scaleY(d.rank_people));
 
-	d3.select(this)
-		.select('svg')
-		.at('width', svgWidth)
-		.at('height', personHeight);
+	const $svg = d3.select(this).select('svg.trend');
+	console.log({personHeight})
+	$svg.at('width', svgWidth).at('height', personHeight * 2);
 
-	d3.select(this)
-		.select('.g-vis')
-		.at('transform', `translate(${MARGIN}, ${MARGIN})`);
+	const $gVis = $svg.select('.g-vis');
+	const $gAxis = $svg.select('.g-axis');
 
-	d3.select(this)
-		.select('.g-vis circle')
+	$gVis.at('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
+	$gAxis.at('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
+
+	const $line = $gVis.select('path.line');
+	$line.at('d', line(data));
+
+	const $area = $gVis.select('path.area');
+	$area.at('d', area(data));
+
+	$gVis
+		.select('circle')
 		.at('cx', scaleX(data[currentDay].date))
 		.at('cy', scaleY(data[currentDay].rank_people));
+
+	$gAxis.select('.start').at({
+		x: 0,
+		y: scaleY.range()[1] + AXIS_FONT_SIZE * 1.25
+	});
+
+	$gAxis.select('.end').at({
+		x: scaleX.range()[1],
+		y: scaleY.range()[1] + AXIS_FONT_SIZE * 1.25
+	});
+
+	$gAxis.select('line.top-10').at({
+		x1: 0,
+		y1: scaleY(9) + 1,
+		x2: scaleX.range()[1],
+		y2: scaleY(9) + 1
+	});
+
+	$gAxis.select('text.top-10').at({
+		x: scaleX.range()[1],
+		y: scaleY(9) - AXIS_FONT_SIZE * 0.25
+	});
 }
 
 function updateChart(skip) {
@@ -398,9 +439,30 @@ function updateChart(skip) {
 
 	$belowEnter.append('p.description').text(d => d.description);
 	const $svgEnter = $belowEnter.append('svg.trend');
-	$svgEnter.append('g.g-axis');
+	const $axisEnter = $svgEnter.append('g.g-axis');
 	const $visEnter = $svgEnter.append('g.g-vis');
-	$visEnter.append('path').st('stroke', d => d.color.bg);
+	$axisEnter
+		.append('text.start')
+		.text('Jan')
+		.at('y', 0)
+		.at('text-anchor', 'start')
+		.st('fill', d => d.color.bg);
+	$axisEnter
+		.append('text.end')
+		.text('Dec')
+		.at('y', 0)
+		.at('text-anchor', 'end')
+		.st('fill', d => d.color.bg);
+	$axisEnter.append('line.top-10').st('stroke', d => d.color.bg);
+	$axisEnter
+		.append('text.top-10')
+		.text('Top 10')
+		.at('y', 0)
+		.at('text-anchor', 'end')
+		.st('fill', d => d.color.bg);
+	$visEnter.append('path.area').st('fill', d => d.color.bg);
+	$visEnter.append('path.line').st('stroke', d => d.color.bg);
+
 	$visEnter
 		.append('circle')
 		.at('r', 3)
@@ -450,7 +512,7 @@ function updateChart(skip) {
 		.at('href', getEditURL)
 		.classed('is-transparent', d => d.annotation);
 
-	svgWidth = $liMerge.node().offsetWidth;
+	svgWidth = $liMerge.node().offsetWidth - REM;
 	$liMerge.each(updateTrend);
 }
 
@@ -469,7 +531,7 @@ function resize() {
 	mobile = $section.node().offsetWidth < BP;
 	const fs = mobile ? 14 : 20;
 	personHeight = fs * 2 + 8;
-	const height = (NUM_PEOPLE + 2) * personHeight;
+	const height = (NUM_PEOPLE + 3) * personHeight;
 	$rankList.st({
 		height
 	});
