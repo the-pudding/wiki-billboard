@@ -1,9 +1,23 @@
 #tally
   .person path
-    stroke black
+    stroke #9e9e9e
     fill none
+
+  .person text
+    visibility: hidden
 
   .g-voronoi
     path
-      stroke-opacity: 0
+      stroke-opacity: 1
+      // stroke black
       fill-opacity 0
+  
+  path.is-active 
+    stroke-width 2px
+    stroke white
+
+  text.is-active 
+    font-weight: 900
+    fill white
+    visibility: visible
+    

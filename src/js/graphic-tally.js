@@ -70,7 +70,7 @@ function loadData() {
 					return d3.descending(maxA, maxB);
 				});
 
-				nestedData = tempNestedData.slice(0, 20);
+				nestedData = tempNestedData.slice(0, 50);
 				resolve();
 			}
 		});
@@ -85,26 +85,38 @@ function loadData() {
 function handleVoronoiEnter(d) {
 	const celebrityName = d.data.name;
 
-	$gViz.select(`[data-name='${celebrityName}'] path`).st('stroke', '#f33');
-
-	$gViz.select(`[data-name='${celebrityName}'] text`).st('font-weight', '900');
+	console.log('active')
+	$gViz.select(`[data-name='${celebrityName}'] path`).classed('is-active', true)
+	$gViz.select(`[data-name='${celebrityName}'] text`).classed('is-active', true)
 }
 
 function handleVoronoiLeave(d) {
-	$gViz.selectAll('path').st('stroke', '#000000');
-
-	$gViz.selectAll('text').st('font-weight', '400');
+	$gViz.selectAll('path').classed('is-active', false)
+	$gViz.selectAll('text').classed('is-active', false)
 }
 
 function setupVoronoi() {
 	voronoi
 		.x(d => scaleX(d.date))
 		.y(d => scaleY(d[COL]))
-		.extent([[0, 0], [width, height]]);
+		.extent([
+			[0, 0],
+			[width, height]
+		]);
 
 	$voronoiGroup = $gViz.append('g').at('class', 'g-voronoi');
 
-	const mergedData = d3.merge(nestedData.map(d => d.values));
+
+	const flatData = nestedData.map(d => {
+		return d.values[d.values.length - 1]
+	})
+
+
+
+	const mergedData = d3.merge(nestedData.map(d => {
+		// return d.values[d.values.length - 1]
+		return d.values
+	}));
 
 	const $voronoiPath = $voronoiGroup.selectAll('path');
 
@@ -167,8 +179,8 @@ function render() {
 		// .at('data-name', d => d.key)
 		.datum(
 			d =>
-				// console.log(d);
-				d.values
+			// console.log(d);
+			d.values
 		)
 		.at('d', line);
 }
