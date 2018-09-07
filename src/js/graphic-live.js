@@ -291,7 +291,7 @@ function updateTrend({ article }) {
 	const end = parseDate('2018-12-31');
 
 	const days = generateRangeOfDays({ start, end });
-	const data = days.filter((d, i) => i <= currentDay).map(d => {
+	const data = days.map(d => {
 		const m = match.values.find(v => v.dateString === d.dateString);
 		return {
 			...d,
