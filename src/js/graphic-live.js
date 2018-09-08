@@ -269,7 +269,6 @@ function loadAllData() {
 			const clean = cleanAll(response[0]);
 			const annotations = response[1];
 			const merged = mergeAnnotations(annotations, clean);
-			console.log(merged.filter(m => m.annotation));
 			nestedDataAll = nestAll(merged);
 			maxRank = d3.max(merged, d => d.rank_people);
 			$rankList.selectAll('.person').each(updateTrend);
