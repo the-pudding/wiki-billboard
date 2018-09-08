@@ -241,16 +241,37 @@ function cleanAppearance(data) {
 	});
 }
 
+function mergeAnnotations(annotations, data) {
+	return data.map(d => {
+		let annotation = null;
+		if (d.rank_people < 10) {
+			const match = annotations.find(
+				a => a.person === d.article && a.date === d.dateString
+			);
+			if (match) annotation = match.annotation;
+		}
+
+		return {
+			...d,
+			annotation
+		};
+	});
+}
+
 function loadAllData() {
 	const timeStamped = Date.now();
 	const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--all.csv?version=${timeStamped}`;
+	const annotationsURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-annotations.csv?version=${timeStamped}`;
 
-	d3.loadData(dataURL, (error, response) => {
+	d3.loadData(dataURL, annotationsURL, (error, response) => {
 		if (error) console.log(error);
 		else {
 			const clean = cleanAll(response[0]);
-			nestedDataAll = nestAll(clean);
-			maxRank = d3.max(clean, d => d.rank_people);
+			const annotations = response[1];
+			const merged = mergeAnnotations(annotations, clean);
+			console.log(merged.filter(m => m.annotation));
+			nestedDataAll = nestAll(merged);
+			maxRank = d3.max(merged, d => d.rank_people);
 			$rankList.selectAll('.person').each(updateTrend);
 		}
 	});
