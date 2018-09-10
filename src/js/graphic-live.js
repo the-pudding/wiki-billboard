@@ -267,7 +267,6 @@ function loadAllData() {
 
 function loadAppearanceData() {
 	
-
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;

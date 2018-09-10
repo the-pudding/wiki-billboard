@@ -1,12 +1,15 @@
 import './pudding-chart/tally';
+import categories from './people-categories.json';
 
 let cleanedDataAlive = [];
 let cleanedDataDead = [];
-const nestedData = [];
+let byCategory = [];
+let allData = [];
 
 const COL = 'appearance_sum';
 const $section = d3.select('#tally');
-const $tallyFigures = $section.select('.tally__figures');
+const $figuresFeature = $section.select('.tally__figures--feature');
+const $figuresCategory = $section.select('.tally__figures--category');
 
 const $celebPaths = null;
 const $voronoiGroup = null;
@@ -16,7 +19,8 @@ const $personText = null;
 const width = 0;
 let height = 0;
 
-let charts = [];
+let featureCharts = [];
+let categoryCharts = [];
 
 const MARGIN = {
 	top: 20,
@@ -46,7 +50,22 @@ function cleanTheData(data) {
 	}));
 }
 
-function loadData() {
+function nestData({ data, count = 50 }) {
+	const tempNestedData = d3
+		.nest()
+		.key(d => d.id)
+		.entries(data);
+
+	tempNestedData.sort((a, b) => {
+		const maxA = a.values[a.values.length - 1].appearance_sum;
+		const maxB = b.values[b.values.length - 1].appearance_sum;
+		return d3.descending(maxA, maxB);
+	});
+
+	return tempNestedData.slice(0, count);
+}
+
+function loadData(dataPeople) {
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		// const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-views--alive.csv?version=${timeStamped}`;
@@ -56,43 +75,50 @@ function loadData() {
 		d3.loadData(dataURL1, dataURL2, (error, response) => {
 			if (error) reject(error);
 			else {
-				cleanedDataAlive = cleanTheData(response[0]);
-				cleanedDataDead = cleanTheData(response[1]);
+				const c1 = cleanTheData(response[0]);
+				const c2 = cleanTheData(response[1]);
+				allData = c1.concat(c2);
+				cleanedDataAlive = nestData({ data: c1 });
+				cleanedDataDead = nestData({ data: c2 });
+
+				// nest by person all
+				const allNested = nestData({ data: allData });
+				allNested.forEach(person => {
+					const match = dataPeople.find(d => d.id === person.key);
+					person.category = match ? match.category : null;
+				});
+
+				byCategory = d3
+					.nest()
+					.key(d => d.category)
+					.entries(allNested)
+					.filter(d => d.values.length >= 10);
+
+				// add people data categories
+
 				resolve();
 			}
 		});
 	});
 }
 
-// function getMaxSum(data) {
-// const maxes = data.map(person => d3.sum(person.values, v => v.score))
-// return d3.max(maxes)
-// }
-
-function handleVoronoiEnter(d) {
-	const celebrityName = d.data.name;
-
-	console.log('active');
-	$gViz
-		.select(`[data-name='${celebrityName}'] path`)
-		.classed('is-active', true);
-	$gViz
-		.select(`[data-name='${celebrityName}'] text`)
-		.classed('is-active', true);
-}
-
-function handleVoronoiLeave(d) {
-	$gViz.selectAll('path').classed('is-active', false);
-	$gViz.selectAll('text').classed('is-active', false);
-}
-
 function setupCharts() {
-	charts = $tallyFigures
+	const maxY = d3.max(allData, d => d.appearance_sum);
+
+	featureCharts = $figuresFeature
 		.selectAll('figure')
 		.data([cleanedDataAlive, cleanedDataDead])
 		.enter()
 		.append('figure')
-		.puddingChartTally();
+		.puddingChartTally({ maxY });
+
+	// console.log(byCategory.map(d => d.values));
+	categoryCharts = $figuresCategory
+		.selectAll('figure')
+		.data(byCategory.map(d => d.values))
+		.enter()
+		.append('figure')
+		.puddingChartTally({ maxY });
 }
 
 function resize() {
@@ -100,16 +126,15 @@ function resize() {
 
 	// width = $tallyFigures.node().offsetWidth;
 	height = Math.floor(window.innerHeight * 0.75);
-	$tallyFigures.selectAll('figure').st({ height });
+	$figuresFeature.selectAll('figure').st({ height });
 
-	charts.forEach(c => c.resize().render());
+	featureCharts.forEach(c => c.resize().render());
 	// render();
 	// setupVoronoi();
 }
 
 function init(dataPeople) {
-	// console.log(dataPeople)
-	loadData()
+	loadData(dataPeople)
 		.then(() => {
 			setupCharts();
 			resize();

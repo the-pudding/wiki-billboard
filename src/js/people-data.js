@@ -46,6 +46,7 @@ function addOccupation(data) {
 		const category = lookupCategory(occupation);
 		return {
 			...person,
+			id: person.article.replace(/([^a-zA-Z])/g, ''),
 			occupation,
 			category
 		};

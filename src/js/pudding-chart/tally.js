@@ -13,11 +13,12 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 
 		// dimension stuff
 		const FONT_SIZE = 12;
+		const ASPECT_RATIO = 3 / 2;
 		let width = 0;
 		let height = 0;
 		const marginTop = FONT_SIZE * 2;
 		const marginBottom = FONT_SIZE * 3;
-		const marginLeft = FONT_SIZE;
+		const marginLeft = FONT_SIZE * 3;
 		const marginRight = FONT_SIZE;
 
 		// scales
@@ -33,20 +34,6 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 		const voronoi = d3.voronoi();
 
 		// helper functions
-		function nestData() {
-			const tempNestedData = d3
-				.nest()
-				.key(d => d.id)
-				.entries(data);
-
-			tempNestedData.sort((a, b) => {
-				const maxA = a.values[a.values.length - 1].appearance_sum;
-				const maxB = b.values[b.values.length - 1].appearance_sum;
-				return d3.descending(maxA, maxB);
-			});
-
-			return tempNestedData.slice(0, 50);
-		}
 
 		function setupVoronoi() {
 			// const flatData = nestedData.map(d => d.values[d.values.length - 1]);
@@ -84,6 +71,9 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 				// create axis
 				$axis = $svg.append('g.g-axis');
 
+				$axis.append('g.axis--x');
+				$axis.append('g.axis--y');
+
 				// setup viz group
 				$vis = $g.append('g.g-vis');
 				$g.append('g.g-voronoi').at(
@@ -91,10 +81,8 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					`translate(${marginLeft}, ${marginTop})`
 				);
 
-				const personData = nestData();
-
 				// bind data to dom elements
-				const $person = $vis.selectAll('g.person').data(personData);
+				const $person = $vis.selectAll('g.person').data(data);
 
 				// create elements
 				const $personEnter = $person
@@ -110,9 +98,11 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.text(d => d.values[0].name);
 
 				// setup scales
-				scaleX.domain(d3.extent(data, d => d.date));
+				scaleX.domain(d3.extent(data[0].values, d => d.date));
 
-				scaleY.domain([0, d3.max(data, d => d.appearance_sum)]);
+				scaleY.domain([0, options.maxY]);
+
+				console.log(scaleY.domain());
 
 				// setup voronoi
 				voronoi.x(d => scaleX(d.date)).y(d => scaleY(d.appearance_sum));
@@ -125,6 +115,7 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 				// defaults to grabbing dimensions from container element
 				width = $sel.node().offsetWidth - marginLeft - marginRight;
 				height = $sel.node().offsetHeight - marginTop - marginBottom;
+				height = width / ASPECT_RATIO - marginTop - marginBottom;
 				$svg.at({
 					width: width + marginLeft + marginRight,
 					height: height + marginTop + marginBottom
@@ -181,6 +172,21 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.at('d', d => (d ? `M${d.join('L')}Z` : null))
 					.on('mouseenter', handleVoronoiEnter)
 					.on('mouseout', handleVoronoiExit);
+
+				// update axis
+				const axisY = d3.axisLeft(scaleY).tickSize(-width);
+
+				$axis
+					.select('.axis--y')
+					.call(axisY)
+					.at('transform', `translate(${FONT_SIZE * 2}, ${marginTop})`);
+
+				const axisX = d3.axisBottom(scaleX).tickFormat(d3.timeFormat('%b'));
+
+				$axis
+					.select('.axis--x')
+					.call(axisX)
+					.at('transform', `translate(${marginLeft}, ${height + marginTop})`);
 
 				return Chart;
 			},
