@@ -253,31 +253,33 @@ function mergeAnnotations(annotations, data) {
 function loadAllData() {
 	const timeStamped = Date.now();
 	const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--all.csv?version=${timeStamped}`;
-	const annotationsURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-annotations.csv?version=${timeStamped}`;
 
-	d3.loadData(dataURL, annotationsURL, (error, response) => {
+	d3.loadData(dataURL, (error, response) => {
 		if (error) console.log(error);
 		else {
 			const clean = cleanAll(response[0]);
-			const annotations = response[1];
-			const merged = mergeAnnotations(annotations, clean);
-			nestedDataAll = nestAll(merged);
-			maxRank = d3.max(merged, d => d.rank_people);
+			nestedDataAll = nestAll(clean);
+			maxRank = d3.max(clean, d => d.rank_people);
 			$rankList.selectAll('.person').each(updateTrend);
 		}
 	});
 }
 
 function loadAppearanceData() {
+	
+
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;
+		const annotationsURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-annotations.csv?version=${timeStamped}`;
 
-		d3.loadData(dataURL, (error, response) => {
+		d3.loadData(dataURL, annotationsURL, (error, response) => {
 			if (error) reject(error);
 			else {
 				cleanedData = cleanAppearance(response[0]);
-				nestedData = nestAppearance(cleanedData);
+				const annotations = response[1];
+				const merged = mergeAnnotations(annotations, cleanedData);
+				nestedData = nestAppearance(merged);
 				currentDay = nestedData.length - DAYS_TO_START;
 
 				resolve();
@@ -536,7 +538,9 @@ function updateChart(skip) {
 			d => (skip ? 0 : mergeDelay + ((d.rank_people * updateDelay) / 2) * rate)
 		)
 		.duration(skip ? 0 : 1000 * rate)
-		.text(d => d.annotation || '');
+		.text(d => {
+			return d.annotation || ''
+		});
 
 	$liMerge
 		.select('.edit')

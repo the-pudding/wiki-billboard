@@ -15,10 +15,10 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 		const FONT_SIZE = 12;
 		let width = 0;
 		let height = 0;
-		const marginTop = 10;
-		const marginBottom = 30;
-		const marginLeft = 10;
-		const marginRight = 30;
+		const marginTop = FONT_SIZE * 2;
+		const marginBottom = FONT_SIZE * 3;
+		const marginLeft = FONT_SIZE;
+		const marginRight = FONT_SIZE;
 
 		// scales
 		const scaleX = d3.scaleTime();
@@ -107,7 +107,6 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 				$personEnter
 					.append('text')
 					.at('text-anchor', 'end')
-					.at('y', -FONT_SIZE / 2)
 					.text(d => d.values[0].name);
 
 				// setup scales
@@ -157,7 +156,7 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.select('text')
 					.at('y', d => {
 						const totalViews = +d.values[d.values.length - 1].appearance_sum;
-						return scaleY(totalViews);
+						return scaleY(totalViews) - FONT_SIZE / 2;
 					})
 					.at('x', d => {
 						const finalDate = d.values[d.values.length - 1].date;
