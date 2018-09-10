@@ -460,7 +460,7 @@ function updateChart(skip) {
 	const $linkEnter = $descriptionEnter
 		.append('a.wiki')
 		.at('target', '_blank')
-		.at('href', d => `https://wikipedia.org/${d.link}`);
+		.at('href', d => `https://wikipedia.org${d.link}`);
 
 	$linkEnter
 		.append('svg')

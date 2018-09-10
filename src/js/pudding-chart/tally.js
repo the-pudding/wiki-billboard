@@ -12,12 +12,13 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 		let data = $sel.datum();
 
 		// dimension stuff
+		const FONT_SIZE = 12;
 		let width = 0;
 		let height = 0;
-		const marginTop = 0;
-		const marginBottom = 0;
-		const marginLeft = 0;
-		const marginRight = 0;
+		const marginTop = 10;
+		const marginBottom = 30;
+		const marginLeft = 10;
+		const marginRight = 30;
 
 		// scales
 		const scaleX = d3.scaleTime();
@@ -60,7 +61,10 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 
 		function handleVoronoiEnter(d) {
 			const { id } = d.data;
-			$vis.select(`[data-id='${id}']`).classed('is-active', true);
+			$vis
+				.select(`[data-id='${id}']`)
+				.classed('is-active', true)
+				.raise();
 		}
 
 		function handleVoronoiExit(d) {
@@ -82,6 +86,10 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 
 				// setup viz group
 				$vis = $g.append('g.g-vis');
+				$g.append('g.g-voronoi').at(
+					'transform',
+					`translate(${marginLeft}, ${marginTop})`
+				);
 
 				const personData = nestData();
 
@@ -96,7 +104,11 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 
 				$personEnter.append('path');
 
-				$personEnter.append('text').text(d => d.values[0].name);
+				$personEnter
+					.append('text')
+					.at('text-anchor', 'end')
+					.at('y', -FONT_SIZE / 2)
+					.text(d => d.values[0].name);
 
 				// setup scales
 				scaleX.domain(d3.extent(data, d => d.date));
@@ -105,7 +117,6 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 
 				// setup voronoi
 				voronoi.x(d => scaleX(d.date)).y(d => scaleY(d.appearance_sum));
-				$vis.append('g.g-voronoi');
 
 				Chart.resize();
 				Chart.render();
@@ -123,7 +134,10 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 				scaleX.range([0, width]);
 				scaleY.range([height, 0]);
 
-				$svg.at({ width, height });
+				$svg.at({
+					width: width + marginLeft + marginRight,
+					height: height + marginTop + marginBottom
+				});
 
 				voronoi.extent([[0, 0], [width, height]]);
 
@@ -156,7 +170,7 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.at('d', line);
 
 				// update voronoi
-				const $path = $vis
+				const $path = $svg
 					.select('.g-voronoi')
 					.selectAll('path')
 					.data(voronoi.polygons(data));
