@@ -112,7 +112,6 @@ function setupCharts() {
 		.append('figure')
 		.puddingChartTally({ maxY });
 
-	// console.log(byCategory.map(d => d.values));
 	categoryCharts = $figuresCategory
 		.selectAll('figure')
 		.data(byCategory.map(d => d.values))
