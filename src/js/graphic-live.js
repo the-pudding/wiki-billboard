@@ -33,6 +33,7 @@ let svgWidth = 0;
 let maxRank = 0;
 
 const SPEEDS = [8000, 4000, 2000];
+const SPEED_LABELS = ['Slow', 'Medium', 'Fast'];
 const RATES = [1, 0.5, 0.25];
 const EDIT_SVG = '<polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon>';
 
@@ -89,11 +90,11 @@ function handleNameClick() {
 }
 
 function handleSpeedToggle() {
-	speedIndex = +$speedButton.text().replace('x', '') - 1;
+	speedIndex = SPEED_LABELS.indexOf($speedButton.text());
 	speedIndex += 1;
 	if (speedIndex >= SPEEDS.length) speedIndex = 0;
 
-	$speedButton.text(`${speedIndex + 1}x`);
+	$speedButton.text(SPEED_LABELS[speedIndex]);
 	advanceChart();
 }
 function handleAutoplayToggle() {
