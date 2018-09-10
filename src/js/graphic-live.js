@@ -114,7 +114,7 @@ function setupNav() {
 	$speedButton.on('click', handleSpeedToggle);
 }
 
-function handleEnd() {
+function handleChange() {
 	isSliding = false;
 }
 
@@ -164,7 +164,7 @@ function setupSlider() {
 	});
 
 	slider.on('slide', handleSlide);
-	slider.on('end', handleEnd);
+	slider.on('change', handleChange);
 }
 
 function preload(index) {
@@ -286,7 +286,6 @@ function loadAppearanceData() {
 			else {
 				cleanedData = cleanAppearance(response[0]);
 				nestedData = nestAppearance(cleanedData);
-
 				currentDay = nestedData.length - DAYS_TO_START;
 
 				resolve();
@@ -548,7 +547,7 @@ function advanceChart() {
 		autoplay &&
 		!isSliding &&
 		!isBelow &&
-		currentDay < nestedData.length - 2
+		currentDay < nestedData.length - 1
 	) {
 		currentDay += 1;
 		$sliderNode.noUiSlider.set(currentDay);

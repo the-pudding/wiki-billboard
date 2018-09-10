@@ -36,7 +36,7 @@ function lookupOccupation(description) {
 function lookupCategory(occupation) {
 	const keys = Object.keys(categories);
 	const match = keys.find(key => categories[key].includes(occupation));
-	return match;
+	return match || 'misc';
 }
 
 function addOccupation(data) {
