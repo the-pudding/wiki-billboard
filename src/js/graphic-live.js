@@ -1,6 +1,5 @@
 /* global d3 */
 import * as noUiSlider from 'nouislider';
-import truncate from './utils/truncate';
 import colors from './colors.json';
 import preloadImage from './preload-image';
 
@@ -36,6 +35,8 @@ const SPEEDS = [8000, 4000, 2000];
 const SPEED_LABELS = ['Slow', 'Medium', 'Fast'];
 const RATES = [1, 0.5, 0.25];
 const EDIT_SVG = '<polygon points="16 3 21 8 8 21 3 21 3 16 16 3"></polygon>';
+const LINK_SVG =
+	'<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>';
 
 const $section = d3.select('#live');
 const $dayCounter = $section.select('div.live__date-counter');
@@ -218,12 +219,7 @@ function cleanAppearance(data) {
 		const match = getPerson(person.article);
 		return {
 			article: person.article,
-			name: truncate({
-				text: person.article.replace(/_/g, ' '),
-				chars: 21,
-				clean: false,
-				ellipses: true
-			}),
+			name: match.display,
 			rank_people: +person.rank_people,
 			views: +person.views,
 			dateString: person.date,
@@ -231,13 +227,8 @@ function cleanAppearance(data) {
 			annotation: person.annotation,
 			color: match ? colors[match.category] : { fg: '#333', bg: '#ccc' },
 			thumbnail: match ? match.thumbnail_source : null,
-			description: match
-				? truncate({
-					text: match.description,
-					chars: 35,
-					ellipses: true
-				  })
-				: ''
+			description: match.description,
+			link: match.link
 		};
 	});
 }
@@ -462,7 +453,22 @@ function updateChart(skip) {
 		.st('background-color', d => d.color.fg)
 		.st('color', d => d.color.bg);
 
-	$belowEnter.append('p.description').text(d => d.description);
+	const $descriptionEnter = $belowEnter
+		.append('p.description')
+		.text(d => d.description);
+
+	const $linkEnter = $descriptionEnter
+		.append('a.wiki')
+		.at('target', '_blank')
+		.at('href', d => `https://wikipedia.org/${d.link}`);
+
+	$linkEnter
+		.append('svg')
+		.at('width', 24)
+		.at('height', 24)
+		.at('viewBox', '0 0 24 24')
+		.html(LINK_SVG);
+
 	const $svgEnter = $belowEnter.append('svg.trend');
 	const $axisEnter = $svgEnter.append('g.g-axis');
 	const $visEnter = $svgEnter.append('g.g-vis');

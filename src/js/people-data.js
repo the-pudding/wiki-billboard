@@ -1,6 +1,7 @@
 import nGram from 'n-gram';
 import dictionary from './people-dictionary.json';
 import categories from './people-categories.json';
+import truncate from './utils/truncate';
 
 function lookupOccupation(description) {
 	const tokens = description
@@ -51,6 +52,34 @@ function addOccupation(data) {
 	});
 }
 
+function cleanDisplay(str) {
+	const t = truncate({
+		text: str,
+		chars: 20,
+		clean: false,
+		ellipses: true
+	});
+	const i = t.indexOf('(');
+	if (i > -1) return t.substring(0, i);
+	return t;
+}
+
+function cleanDescription(str) {
+	return truncate({
+		text: str,
+		chars: 40,
+		ellipses: true,
+		clean: true
+	});
+}
+
+function cleanData(data) {
+	return data.map(d => ({
+		...d,
+		display: cleanDisplay(d.display),
+		description: cleanDescription(d.description)
+	}));
+}
 function init() {
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
@@ -58,7 +87,11 @@ function init() {
 
 		d3.loadData(dataURL, (error, response) => {
 			if (error) reject(error);
-			else resolve(addOccupation(response[0]));
+			else {
+				const withOccupation = addOccupation(response[0]);
+				const clean = cleanData(withOccupation);
+				resolve(clean);
+			}
 		});
 	});
 }
