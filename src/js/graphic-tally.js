@@ -6,7 +6,14 @@ let cleanedDataDead = [];
 let byCategory = [];
 let allData = [];
 
-const COL = 'appearance_sum';
+const catLabels = {
+	'film/tv/theater': 'film, tv, and theater',
+	sports: 'sports',
+	music: 'music',
+	culture: 'culture',
+	misc: 'politics, business, and other'
+};
+
 const $section = d3.select('#tally');
 const $figuresFeature = $section.select('.tally__figures--feature');
 const $figuresCategory = $section.select('.tally__figures--category');
@@ -92,7 +99,12 @@ function loadData(dataPeople) {
 					.nest()
 					.key(d => d.category)
 					.entries(allNested)
-					.filter(d => d.values.length >= 10);
+					.filter(d => d.values.length >= 10)
+					.map(d => ({
+						...d,
+						key: catLabels[d.key],
+						cat: d.key
+					}));
 
 				// add people data categories
 
@@ -107,17 +119,20 @@ function setupCharts() {
 
 	featureCharts = $figuresFeature
 		.selectAll('figure')
-		.data([cleanedDataAlive, cleanedDataDead])
+		.data([
+			{ key: 'Alive', values: cleanedDataAlive },
+			{ key: 'Dead', values: cleanedDataDead }
+		])
 		.enter()
 		.append('figure')
 		.puddingChartTally({ maxY });
 
 	categoryCharts = $figuresCategory
 		.selectAll('figure')
-		.data(byCategory.map(d => d.values))
+		.data(byCategory)
 		.enter()
 		.append('figure')
-		.puddingChartTally({ maxY });
+		.puddingChartTally({ maxY, count: 10 });
 }
 
 function resize() {

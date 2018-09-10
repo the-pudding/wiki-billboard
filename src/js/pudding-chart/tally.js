@@ -6,7 +6,7 @@
  4a. const charts = d3.selectAll('.thing').data(data).puddingChartLine();
  4b. const chart = d3.select('.thing').datum(datum).puddingChartLine();
 */
-d3.selection.prototype.puddingChartTally = function init(options) {
+d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 	function createChart(el) {
 		const $sel = d3.select(el);
 		let data = $sel.datum();
@@ -62,6 +62,8 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 		const Chart = {
 			// called once at start
 			init() {
+				if (data.cat) $sel.classed(data.cat.split('/')[0], true);
+				$sel.append('p.label').text(data.key);
 				$svg = $sel.append('svg.pudding-chart');
 				const $g = $svg.append('g');
 
@@ -82,7 +84,9 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 				);
 
 				// bind data to dom elements
-				const $person = $vis.selectAll('g.person').data(data);
+				const $person = $vis
+					.selectAll('g.person')
+					.data(data.values.slice(0, count));
 
 				// create elements
 				const $personEnter = $person
@@ -98,11 +102,9 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.text(d => d.values[0].name);
 
 				// setup scales
-				scaleX.domain(d3.extent(data[0].values, d => d.date));
+				scaleX.domain(d3.extent(data.values[0].values, d => d.date));
 
-				scaleY.domain([0, options.maxY]);
-
-				console.log(scaleY.domain());
+				scaleY.domain([0, maxY]);
 
 				// setup voronoi
 				voronoi.x(d => scaleX(d.date)).y(d => scaleY(d.appearance_sum));
@@ -160,18 +162,18 @@ d3.selection.prototype.puddingChartTally = function init(options) {
 					.at('d', line);
 
 				// update voronoi
-				const $path = $svg
-					.select('.g-voronoi')
-					.selectAll('path')
-					.data(voronoi.polygons(data));
+				// const $path = $svg
+				// 	.select('.g-voronoi')
+				// 	.selectAll('path')
+				// 	.data(voronoi.polygons(data.values));
 
-				$path
-					.enter()
-					.append('path')
-					.merge($path)
-					.at('d', d => (d ? `M${d.join('L')}Z` : null))
-					.on('mouseenter', handleVoronoiEnter)
-					.on('mouseout', handleVoronoiExit);
+				// $path
+				// 	.enter()
+				// 	.append('path')
+				// 	.merge($path)
+				// 	.at('d', d => (d ? `M${d.join('L')}Z` : null))
+				// 	.on('mouseenter', handleVoronoiEnter)
+				// 	.on('mouseout', handleVoronoiExit);
 
 				// update axis
 				const axisY = d3.axisLeft(scaleY).tickSize(-width);

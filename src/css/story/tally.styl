@@ -1,6 +1,27 @@
 #tally
 	figure
 		max-width 60rem
+	.misc
+		.label
+			background-color $misc
+		.person path
+			stroke $misc
+	.film
+		.label
+			background-color $film
+		.person path
+				stroke $film
+	.sports
+		.label
+			background-color $sports
+		.person path
+			stroke $sports
+	.music
+		.label
+			background-color $music
+		.person path
+			stroke $music
+
 	.person
 		path
 			stroke $gray
@@ -47,3 +68,9 @@
 			display none
 		path
 			display none
+
+	
+	.label
+		display inline-block
+		color $bg
+		font-weight 600
