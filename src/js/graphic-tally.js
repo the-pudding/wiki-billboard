@@ -36,6 +36,8 @@ const MARGIN = {
 	right: 200
 };
 
+
+
 function parseDate(date) {
 	const dates = date.split('-').map(d => +d);
 	return new Date(dates[0], dates[1] - 1, dates[2]);
@@ -57,7 +59,10 @@ function cleanTheData(data) {
 	}));
 }
 
-function nestData({ data, count = 50 }) {
+function nestData({
+	data,
+	count = 50
+}) {
 	const tempNestedData = d3
 		.nest()
 		.key(d => d.id)
@@ -85,11 +90,17 @@ function loadData(dataPeople) {
 				const c1 = cleanTheData(response[0]);
 				const c2 = cleanTheData(response[1]);
 				allData = c1.concat(c2);
-				cleanedDataAlive = nestData({ data: c1 });
-				cleanedDataDead = nestData({ data: c2 });
+				cleanedDataAlive = nestData({
+					data: c1
+				});
+				cleanedDataDead = nestData({
+					data: c2
+				});
 
 				// nest by person all
-				const allNested = nestData({ data: allData });
+				const allNested = nestData({
+					data: allData
+				});
 				allNested.forEach(person => {
 					const match = dataPeople.find(d => d.id === person.key);
 					person.category = match ? match.category : null;
@@ -119,20 +130,31 @@ function setupCharts() {
 
 	featureCharts = $figuresFeature
 		.selectAll('figure')
-		.data([
-			{ key: 'Alive', values: cleanedDataAlive },
-			{ key: 'Dead', values: cleanedDataDead }
+		.data([{
+				key: 'Alive',
+				values: cleanedDataAlive
+			},
+			{
+				key: 'Dead',
+				values: cleanedDataDead
+			}
 		])
 		.enter()
 		.append('figure')
-		.puddingChartTally({ maxY });
+		.puddingChartTally({
+			maxY
+		})
+
 
 	categoryCharts = $figuresCategory
 		.selectAll('figure')
 		.data(byCategory)
 		.enter()
 		.append('figure')
-		.puddingChartTally({ maxY, count: 10 });
+		.puddingChartTally({
+			maxY,
+			count: 10
+		});
 }
 
 function resize() {
@@ -140,7 +162,9 @@ function resize() {
 
 	// width = $tallyFigures.node().offsetWidth;
 	height = Math.floor(window.innerHeight * 0.75);
-	$figuresFeature.selectAll('figure').st({ height });
+	$figuresFeature.selectAll('figure').st({
+		height
+	});
 
 	featureCharts.forEach(c => c.resize().render());
 	// render();

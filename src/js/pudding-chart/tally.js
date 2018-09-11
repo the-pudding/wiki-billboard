@@ -6,10 +6,46 @@
  4a. const charts = d3.selectAll('.thing').data(data).puddingChartLine();
  4b. const chart = d3.select('.thing').datum(datum).puddingChartLine();
 */
-d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
+d3.selection.prototype.puddingChartTally = function init({
+	maxY,
+	count = 50
+}) {
 	function createChart(el) {
 		const $sel = d3.select(el);
 		let data = $sel.datum();
+
+		function closest(num, arr) {
+			let curr = arr[0].appearance_sum;
+			let diff = Math.abs(num - curr);
+			for (var val = 0; val < arr.length; val++) {
+				var newdiff = Math.abs(num - arr[val]);
+				if (newdiff < diff) {
+					diff = newdiff;
+					curr = arr[val];
+				}
+			}
+			return curr;
+		}
+
+		const lastDateArray = data.values.map(person => {
+			return person.values[data.values[0].values.length - 1]
+		})
+
+		function getClosestPerson() {
+			const yCoord = scaleY.invert(d3.mouse(this)[1])
+			const selectedPathNumber = closest(yCoord, lastDateArray)
+
+			console.log(selectedPathNumber)
+			console.log(lastDateArray)
+
+			const highlightedPerson = lastDateArray.filter(person => {
+				return person.appearance_sum === selectedPathNumber
+			})
+
+			console.log(highlightedPerson)
+
+		}
+
 
 		// dimension stuff
 		const FONT_SIZE = 12;
@@ -29,6 +65,7 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 		let $svg = null;
 		let $axis = null;
 		let $vis = null;
+		let $personEnter = null;
 
 		// custom
 		const voronoi = d3.voronoi();
@@ -46,8 +83,11 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 			// );
 		}
 
+
 		function handleVoronoiEnter(d) {
-			const { id } = d.data;
+			const {
+				id
+			} = d.data;
 			$vis
 				.select(`[data-id='${id}']`)
 				.classed('is-active', true)
@@ -55,7 +95,9 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 		}
 
 		function handleVoronoiExit(d) {
-			const { id } = d.data;
+			const {
+				id
+			} = d.data;
 			$vis.select(`[data-id='${id}']`).classed('is-active', false);
 		}
 
@@ -69,6 +111,8 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 
 				// offset chart for margins
 				$g.at('transform', `translate(${marginLeft}, ${marginTop})`);
+
+				$svg.on('mousemove', getClosestPerson)
 
 				// create axis
 				$axis = $svg.append('g.g-axis');
@@ -89,7 +133,7 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 					.data(data.values.slice(0, count));
 
 				// create elements
-				const $personEnter = $person
+				$personEnter = $person
 					.enter()
 					.append('g.person')
 					.at('data-id', d => d.key);
@@ -131,7 +175,10 @@ d3.selection.prototype.puddingChartTally = function init({ maxY, count = 50 }) {
 					height: height + marginTop + marginBottom
 				});
 
-				voronoi.extent([[0, 0], [width, height]]);
+				voronoi.extent([
+					[0, 0],
+					[width, height]
+				]);
 
 				return Chart;
 			},
