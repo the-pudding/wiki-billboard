@@ -6,11 +6,6 @@ import './polyfills/find';
 import './polyfills/includes';
 import { loadFontGroup } from './utils/load-font';
 
-const publico = [
-	{ family: 'Publico Text Web', weight: 400 },
-	{ family: 'Publico Text Web', weight: 700 }
-];
-
 const atlas = [
 	{ family: 'Atlas Grotesk Web', weight: 300 },
 	{ family: 'Atlas Grotesk Web', weight: 400 },
@@ -22,5 +17,4 @@ const atlas = [
 if (!window.Promise) window.Promise = Promise;
 
 // load fonts
-loadFontGroup(publico);
 loadFontGroup(atlas);
