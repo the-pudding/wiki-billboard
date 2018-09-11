@@ -61,6 +61,11 @@
 			background-color $music
 		.person path
 			stroke $music
+	.culture
+		.label
+			background-color $culture
+		.person path
+			stroke $culture
 
 	.person
 		path
@@ -85,6 +90,16 @@
 				stroke-opacity 1	
 			text
 				visibility visible
+			&.misc path
+				stroke $misc
+			&.film path
+				stroke $film
+			&.sports  path
+				stroke $sports
+			&.music path
+				stroke $music
+			&.culture path
+				stroke $culture
 
 	.g-voronoi
 		path

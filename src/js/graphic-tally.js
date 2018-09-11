@@ -5,6 +5,7 @@ let cleanedDataAlive = [];
 let cleanedDataDead = [];
 let byCategory = [];
 let allData = [];
+let peopleData = null;
 
 const catLabels = {
 	'film/tv/theater': 'film, tv, and theater',
@@ -57,7 +58,12 @@ function cleanTheData(data) {
 	}));
 }
 
-function nestData({ data, count = 50 }) {
+function getCategory(id) {
+	const match = peopleData.find(d => d.id === id);
+	return match ? match.category : null;
+}
+
+function nestData(data) {
 	const tempNestedData = d3
 		.nest()
 		.key(d => d.id)
@@ -69,10 +75,15 @@ function nestData({ data, count = 50 }) {
 		return d3.descending(maxA, maxB);
 	});
 
-	return tempNestedData.slice(0, count);
+	const withOccupation = tempNestedData.map(person => ({
+		...person,
+		category: getCategory(person.key)
+	}))
+	return withOccupation;
 }
 
-function loadData(dataPeople) {
+function loadData() {
+
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		// const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-views--alive.csv?version=${timeStamped}`;
@@ -85,21 +96,11 @@ function loadData(dataPeople) {
 				const c1 = cleanTheData(response[0]);
 				const c2 = cleanTheData(response[1]);
 				allData = c1.concat(c2);
-				cleanedDataAlive = nestData({
-					data: c1
-				});
-				cleanedDataDead = nestData({
-					data: c2
-				});
+				cleanedDataAlive = nestData(c1);
+				cleanedDataDead = nestData(c2);
 
 				// nest by person all
-				const allNested = nestData({
-					data: allData
-				});
-				allNested.forEach(person => {
-					const match = dataPeople.find(d => d.id === person.key);
-					person.category = match ? match.category : null;
-				});
+				const allNested = nestData(allData);
 
 				byCategory = d3
 					.nest()
@@ -125,13 +126,12 @@ function setupCharts() {
 
 	featureCharts = $figuresFeature
 		.selectAll('figure')
-		.data([
-			{
-				key: 'Alive',
+		.data([{
+				key: 'Living celebrities',
 				values: cleanedDataAlive
 			},
 			{
-				key: 'Dead',
+				key: 'Deceased celebrities',
 				values: cleanedDataDead
 			}
 		])
@@ -167,7 +167,8 @@ function resize() {
 }
 
 function init(dataPeople) {
-	loadData(dataPeople)
+	peopleData = dataPeople;
+	loadData()
 		.then(() => {
 			setupCharts();
 			resize();
