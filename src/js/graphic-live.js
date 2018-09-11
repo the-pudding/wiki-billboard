@@ -266,7 +266,6 @@ function loadAllData() {
 }
 
 function loadAppearanceData() {
-	
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-top--appearance.csv?version=${timeStamped}`;
@@ -299,8 +298,10 @@ function updateTrend({ article }) {
 	const match = nestedDataAll.find(d => d.key === article);
 	if (!match) return false;
 
+	const last = nestedData[nestedData.length - 1];
 	const start = parseDate('2018-01-01');
-	const end = parseDate('2018-12-31');
+	const end = parseDate(last.key);
+	const dec = parseDate('2018-12-31');
 
 	const days = generateRangeOfDays({ start, end });
 	const data = days.map(d => {
@@ -313,7 +314,7 @@ function updateTrend({ article }) {
 
 	const scaleX = d3
 		.scaleTime()
-		.domain([start, end])
+		.domain([start, dec])
 		.range([0, svgWidth - MARGIN.left - MARGIN.right]);
 
 	const scaleY = d3
@@ -537,9 +538,7 @@ function updateChart(skip) {
 			d => (skip ? 0 : mergeDelay + ((d.rank_people * updateDelay) / 2) * rate)
 		)
 		.duration(skip ? 0 : 1000 * rate)
-		.text(d => {
-			return d.annotation || ''
-		});
+		.text(d => d.annotation || '');
 
 	$liMerge
 		.select('.edit')
@@ -592,8 +591,7 @@ function init(people) {
 				resolve(people);
 			})
 			.catch(reject);
-	})
-	
+	});
 }
 
 export default {
