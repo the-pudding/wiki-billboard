@@ -577,19 +577,23 @@ function resize() {
 }
 
 function init(people) {
-	peopleData = people;
-	resize();
-	loadAppearanceData()
-		.then(() => {
-			preload(currentDay);
-			setupNav();
-			updateChart();
-			lastUpdated();
-			setupSlider();
-			timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
-			loadAllData();
-		})
-		.catch(console.log);
+	return new Promise((resolve, reject) => {
+		peopleData = people;
+		resize();
+		loadAppearanceData()
+			.then(() => {
+				preload(currentDay);
+				setupNav();
+				updateChart();
+				lastUpdated();
+				setupSlider();
+				timer = d3.timeout(advanceChart, SPEEDS[speedIndex]);
+				loadAllData();
+				resolve(people);
+			})
+			.catch(reject);
+	})
+	
 }
 
 export default {

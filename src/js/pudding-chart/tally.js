@@ -6,10 +6,7 @@
  4a. const charts = d3.selectAll('.thing').data(data).puddingChartLine();
  4b. const chart = d3.select('.thing').datum(datum).puddingChartLine();
 */
-d3.selection.prototype.puddingChartTally = function init({
-	maxY,
-	count = 50
-}) {
+d3.selection.prototype.puddingChartTally = function init({ maxY, count = 20 }) {
 	function createChart(el) {
 		const $sel = d3.select(el);
 		let data = $sel.datum();
@@ -17,8 +14,8 @@ d3.selection.prototype.puddingChartTally = function init({
 		function closest(num, arr) {
 			let curr = arr[0].appearance_sum;
 			let diff = Math.abs(num - curr);
-			for (var val = 0; val < arr.length; val++) {
-				var newdiff = Math.abs(num - arr[val]);
+			for (let val = 0; val < arr.length; val++) {
+				const newdiff = Math.abs(num - arr[val]);
 				if (newdiff < diff) {
 					diff = newdiff;
 					curr = arr[val];
@@ -27,29 +24,20 @@ d3.selection.prototype.puddingChartTally = function init({
 			return curr;
 		}
 
-		const lastDateArray = data.values.map(person => {
-			return person.values[data.values[0].values.length - 1]
-		})
+		const lastDateArray = data.values.map(
+			person => person.values[data.values[0].values.length - 1]
+		);
 
 		function getClosestPerson() {
-			const yCoord = scaleY.invert(d3.mouse(this)[1])
-			const selectedPathNumber = closest(yCoord, lastDateArray)
-
-			console.log(selectedPathNumber)
-			console.log(lastDateArray)
-
-			const highlightedPerson = lastDateArray.filter(person => {
-				return person.appearance_sum === selectedPathNumber
-			})
-
-			console.log(highlightedPerson)
-
+			const yCoord = scaleY.invert(d3.mouse(this)[1]);
+			const selectedPathNumber = closest(yCoord, lastDateArray);
+			const highlightedPerson = lastDateArray.filter(
+				person => person.appearance_sum === selectedPathNumber
+			);
 		}
-
 
 		// dimension stuff
 		const FONT_SIZE = 12;
-		const ASPECT_RATIO = 3 / 2;
 		let width = 0;
 		let height = 0;
 		const marginTop = FONT_SIZE * 2;
@@ -72,35 +60,6 @@ d3.selection.prototype.puddingChartTally = function init({
 
 		// helper functions
 
-		function setupVoronoi() {
-			// const flatData = nestedData.map(d => d.values[d.values.length - 1]);
-			// const mergedData = d3.merge(
-			// 	nestedData.map(
-			// 		d =>
-			// 			// return d.values[d.values.length - 1]
-			// 			d.values
-			// 	)
-			// );
-		}
-
-
-		function handleVoronoiEnter(d) {
-			const {
-				id
-			} = d.data;
-			$vis
-				.select(`[data-id='${id}']`)
-				.classed('is-active', true)
-				.raise();
-		}
-
-		function handleVoronoiExit(d) {
-			const {
-				id
-			} = d.data;
-			$vis.select(`[data-id='${id}']`).classed('is-active', false);
-		}
-
 		const Chart = {
 			// called once at start
 			init() {
@@ -112,7 +71,7 @@ d3.selection.prototype.puddingChartTally = function init({
 				// offset chart for margins
 				$g.at('transform', `translate(${marginLeft}, ${marginTop})`);
 
-				$svg.on('mousemove', getClosestPerson)
+				$svg.on('mousemove', getClosestPerson);
 
 				// create axis
 				$axis = $svg.append('g.g-axis');
@@ -136,12 +95,18 @@ d3.selection.prototype.puddingChartTally = function init({
 				$personEnter = $person
 					.enter()
 					.append('g.person')
-					.at('data-id', d => d.key);
+					.at('data-id', d => d.key)
+					.classed('is-active', (d, i) => i === 0);
 
 				$personEnter.append('path');
 
 				$personEnter
-					.append('text')
+					.append('text.bg')
+					.at('text-anchor', 'end')
+					.text(d => d.values[0].name);
+
+				$personEnter
+					.append('text.fg')
 					.at('text-anchor', 'end')
 					.text(d => d.values[0].name);
 
@@ -160,8 +125,9 @@ d3.selection.prototype.puddingChartTally = function init({
 			resize() {
 				// defaults to grabbing dimensions from container element
 				width = $sel.node().offsetWidth - marginLeft - marginRight;
-				height = $sel.node().offsetHeight - marginTop - marginBottom;
-				height = width / ASPECT_RATIO - marginTop - marginBottom;
+				// height = $sel.node().offsetHeight - marginTop - marginBottom;
+				const ratio = width < 600 ? 1.125 : 1.67;
+				height = width / ratio - marginTop - marginBottom;
 				$svg.at({
 					width: width + marginLeft + marginRight,
 					height: height + marginTop + marginBottom
@@ -175,10 +141,7 @@ d3.selection.prototype.puddingChartTally = function init({
 					height: height + marginTop + marginBottom
 				});
 
-				voronoi.extent([
-					[0, 0],
-					[width, height]
-				]);
+				voronoi.extent([[0, 0], [width, height]]);
 
 				return Chart;
 			},
@@ -193,7 +156,7 @@ d3.selection.prototype.puddingChartTally = function init({
 				const $person = $vis.selectAll('.person');
 
 				$person
-					.select('text')
+					.selectAll('text')
 					.at('y', d => {
 						const totalViews = +d.values[d.values.length - 1].appearance_sum;
 						return scaleY(totalViews) - FONT_SIZE / 2;
@@ -223,7 +186,10 @@ d3.selection.prototype.puddingChartTally = function init({
 				// 	.on('mouseout', handleVoronoiExit);
 
 				// update axis
-				const axisY = d3.axisLeft(scaleY).tickSize(-width);
+				const axisY = d3
+					.axisLeft(scaleY)
+					.tickSize(-width)
+					.ticks(5);
 
 				$axis
 					.select('.axis--y')

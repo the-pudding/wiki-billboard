@@ -24,7 +24,7 @@ const $personEnter = null;
 const $personText = null;
 
 const width = 0;
-let height = 0;
+const height = 0;
 
 let featureCharts = [];
 let categoryCharts = [];
@@ -35,8 +35,6 @@ const MARGIN = {
 	left: 50,
 	right: 200
 };
-
-
 
 function parseDate(date) {
 	const dates = date.split('-').map(d => +d);
@@ -59,10 +57,7 @@ function cleanTheData(data) {
 	}));
 }
 
-function nestData({
-	data,
-	count = 50
-}) {
+function nestData({ data, count = 50 }) {
 	const tempNestedData = d3
 		.nest()
 		.key(d => d.id)
@@ -110,7 +105,7 @@ function loadData(dataPeople) {
 					.nest()
 					.key(d => d.category)
 					.entries(allNested)
-					.filter(d => d.values.length >= 10)
+					.filter(d => d.values.length >= 5)
 					.map(d => ({
 						...d,
 						key: catLabels[d.key],
@@ -130,7 +125,8 @@ function setupCharts() {
 
 	featureCharts = $figuresFeature
 		.selectAll('figure')
-		.data([{
+		.data([
+			{
 				key: 'Alive',
 				values: cleanedDataAlive
 			},
@@ -143,8 +139,7 @@ function setupCharts() {
 		.append('figure')
 		.puddingChartTally({
 			maxY
-		})
-
+		});
 
 	categoryCharts = $figuresCategory
 		.selectAll('figure')
@@ -161,10 +156,10 @@ function resize() {
 	// Grab width
 
 	// width = $tallyFigures.node().offsetWidth;
-	height = Math.floor(window.innerHeight * 0.75);
-	$figuresFeature.selectAll('figure').st({
-		height
-	});
+	// height = Math.floor(window.innerHeight * 0.75);
+	// $figuresFeature.selectAll('figure').st({
+	// 	height
+	// });
 
 	featureCharts.forEach(c => c.resize().render());
 	// render();

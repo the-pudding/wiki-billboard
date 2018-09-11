@@ -15,7 +15,7 @@ function resize() {
 	const width = $body.node().offsetWidth;
 	if (previousWidth !== width) {
 		previousWidth = width;
-		// graphicLive.resize();
+		graphicLive.resize();
 		graphicTally.resize();
 	}
 }
@@ -42,13 +42,12 @@ function init() {
 	setupStickyHeader();
 
 	// footer async load
-	// footer();
+	footer();
 
 	// kick off graphic code
-	peopleData().then(dataPeople => {
-		// graphicLive.init(dataPeople);
-		graphicTally.init(dataPeople);
-	});
+	peopleData()
+		.then(graphicLive.init)
+		.then(graphicTally.init);
 }
 
 init();

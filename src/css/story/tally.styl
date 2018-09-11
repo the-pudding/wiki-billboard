@@ -1,6 +1,46 @@
 #tally
-	figure
+	h3
+		text-align center
+		font-weight 300
+		set-type-size(x-large, false)
+		margin-bottom 2rem
+	.tally__feature
 		max-width 60rem
+		margin 0 auto
+	
+	.tally__category	
+		max-width 60rem
+		margin 0 auto
+	
+	.tally__figures
+		display flex
+		flex-wrap wrap
+		justify-content center
+		max-width 60rem
+		&--feature
+			figure
+				width 100%
+		&--category
+			figure
+				width 100%
+				+mq('bp-5')
+					width 50%
+	figure
+		position relative
+		margin-bottom 3rem
+	.label
+		position absolute
+		left 50%
+		transform translate(-50%, -50%)
+		display inline-block
+		color $bg
+		font-weight 600
+		margin 0 auto
+		padding 0 1em
+		background-color $fg
+		color $bg
+		set-type-size(x-small, false)
+		text-transform uppercase
 	.misc
 		.label
 			background-color $misc
@@ -24,18 +64,25 @@
 
 	.person
 		path
-			stroke $gray
+			stroke $white
+			stroke-opacity 0.5
 			fill none
 		text
 			visibility hidden
 			font-weight 600
-			set-type-size(small, false)
-			fill $white
+			set-type-size(x-small, false)
+			letter-spacing 0.03em
+			&.bg
+				fill none
+				stroke $bg
+				stroke-width 3px
+			&.fg
+				fill $white
 
 		&.is-active
 			path
 				stroke-width 2px
-				stroke $white
+				stroke-opacity 1	
 			text
 				visibility visible
 
@@ -70,7 +117,4 @@
 			display none
 
 	
-	.label
-		display inline-block
-		color $bg
-		font-weight 600
+	
