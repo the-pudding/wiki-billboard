@@ -2,8 +2,12 @@
 	h3
 		text-align center
 		font-weight 300
-		set-type-size(x-large, false)
 		margin-bottom 3rem
+		set-type-size(large, false)
+		line-height 1.25
+		+mq('bp-4')
+			set-type-size(x-large, false)
+			line-height 1.25
 	.tally__feature
 		max-width 60rem
 		margin 0 auto
@@ -31,6 +35,7 @@
 	.label
 		position absolute
 		left 50%
+		top 0
 		transform translate(-50%, -100%)
 		display inline-block
 		color $bg
@@ -39,8 +44,12 @@
 		padding 0 1em
 		background-color $fg
 		color $bg
-		set-type-size(x-small, false)
+		set-type-size(x-small, true)
+		text-align center
 		text-transform uppercase
+		width 15rem
+		+mq('bp-4')
+			width auto
 	.misc
 		.label
 			background-color $misc
@@ -69,8 +78,8 @@
 
 	.person
 		path
-			stroke $white
-			stroke-opacity 0.5
+			stroke $gray-light
+			stroke-opacity 1
 			fill none
 		text
 			visibility hidden

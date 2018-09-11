@@ -78,12 +78,11 @@ function nestData(data) {
 	const withOccupation = tempNestedData.map(person => ({
 		...person,
 		category: getCategory(person.key)
-	}))
+	}));
 	return withOccupation;
 }
 
 function loadData() {
-
 	return new Promise((resolve, reject) => {
 		const timeStamped = Date.now();
 		// const dataURL = `https://pudding.cool/2018/08/wiki-billboard-data/web/2018-tally-views--alive.csv?version=${timeStamped}`;
@@ -106,7 +105,7 @@ function loadData() {
 					.nest()
 					.key(d => d.category)
 					.entries(allNested)
-					.filter(d => d.values.length >= 5)
+					.filter(d => d.values.length >= 10)
 					.map(d => ({
 						...d,
 						key: catLabels[d.key],
@@ -126,7 +125,8 @@ function setupCharts() {
 
 	featureCharts = $figuresFeature
 		.selectAll('figure')
-		.data([{
+		.data([
+			{
 				key: 'Living celebrities',
 				values: cleanedDataAlive
 			},

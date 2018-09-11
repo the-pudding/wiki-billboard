@@ -62,14 +62,18 @@
 				opacity 0.67
 		.annotation
 			position absolute
-			display block
+			display none
 			top 0
 			right 0
 			transform translate(100%, 0)
 			padding-left 1rem
-			max-width 17rem
+			max-width 12rem
 			color $off-white
 			set-type-size(x-small, true)
+			+mq('bp-5')
+				display block
+			+mq('bp-6')
+				max-width 17rem
 		
 		.edit
 			opacity 0.67
@@ -110,8 +114,9 @@
 			.description
 				margin 0
 				font-weight 500
-				set-type-size(small, true)
-			
+				set-type-size(xx-small, true)
+				+mq('bp-4')
+					set-type-size(small, true)
 			.trend
 				margin-top 0.5rem
 				// width 100%

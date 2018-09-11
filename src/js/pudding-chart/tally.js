@@ -6,24 +6,18 @@
  4a. const charts = d3.selectAll('.thing').data(data).puddingChartLine();
  4b. const chart = d3.select('.thing').datum(datum).puddingChartLine();
 */
-d3.selection.prototype.puddingChartTally = function init({
-	maxY,
-	count = 20
-}) {
+d3.selection.prototype.puddingChartTally = function init({ maxY, count = 20 }) {
 	function createChart(el) {
 		const $sel = d3.select(el);
 		let data = $sel.datum();
+		let mobile = false;
 
-		data.values = data.values.slice(0, count)
+		data.values = data.values.slice(0, count);
 
-		console.log(data.values[0])
-
-		const lastDateArray = data.values.map(
-			person => ({
-				value: person.values[data.values[0].values.length - 1].appearance_sum,
-				id: person.key
-			})
-		)
+		const lastDateArray = data.values.map(person => ({
+			value: person.values[data.values[0].values.length - 1].appearance_sum,
+			id: person.key
+		}));
 
 		// dimension stuff
 		const FONT_SIZE = 12;
@@ -49,17 +43,15 @@ d3.selection.prototype.puddingChartTally = function init({
 
 		// helper functions
 
-
 		function closest(num) {
-			const diffs = lastDateArray.map(d => ({
-				...d,
-				diff: Math.abs(d.value - num)
-			})).sort((a, b) => d3.descending(a.diff, b.diff))
+			const diffs = lastDateArray
+				.map(d => ({
+					...d,
+					diff: Math.abs(d.value - num)
+				}))
+				.sort((a, b) => d3.descending(a.diff, b.diff));
 
-
-			const {
-				id
-			} = diffs.pop()
+			const { id } = diffs.pop();
 			return id;
 		}
 
@@ -68,17 +60,13 @@ d3.selection.prototype.puddingChartTally = function init({
 
 			const id = closest(yCoord);
 
-			$vis.selectAll('.person')
-				.classed('is-active', false)
+			$vis.selectAll('.person').classed('is-active', false);
 
-			$vis.select(`[data-id='${id}']`)
-				.classed('is-active', true)
+			$vis.select(`[data-id='${id}']`).classed('is-active', true);
 		}
 
 		function resetClosestPerson() {
-			$vis.selectAll('.person')
-				.classed('is-active', (d, i) => i === 0)
-
+			$vis.selectAll('.person').classed('is-active', (d, i) => i === 0);
 		}
 
 		const Chart = {
@@ -92,7 +80,8 @@ d3.selection.prototype.puddingChartTally = function init({
 				// offset chart for margins
 				$g.at('transform', `translate(${marginLeft}, ${marginTop})`);
 
-				$svg.on('mousemove touchmove', getClosestPerson)
+				$svg
+					.on('mousemove touchmove', getClosestPerson)
 					.on('mouseleave', resetClosestPerson);
 
 				// create axis
@@ -109,9 +98,7 @@ d3.selection.prototype.puddingChartTally = function init({
 				);
 
 				// bind data to dom elements
-				const $person = $vis
-					.selectAll('g.person')
-					.data(data.values);
+				const $person = $vis.selectAll('g.person').data(data.values);
 
 				// create elements
 				$personEnter = $person
@@ -149,10 +136,11 @@ d3.selection.prototype.puddingChartTally = function init({
 			},
 			// on resize, update new dimensions
 			resize() {
+				mobile = width < 600;
 				// defaults to grabbing dimensions from container element
 				width = $sel.node().offsetWidth - marginLeft - marginRight;
 				// height = $sel.node().offsetHeight - marginTop - marginBottom;
-				const ratio = width < 600 ? 1.125 : 1.67;
+				const ratio = mobile ? 1.125 : 1.67;
 				height = width / ratio - marginTop - marginBottom;
 				$svg.at({
 					width: width + marginLeft + marginRight,
@@ -167,10 +155,7 @@ d3.selection.prototype.puddingChartTally = function init({
 					height: height + marginTop + marginBottom
 				});
 
-				voronoi.extent([
-					[0, 0],
-					[width, height]
-				]);
+				voronoi.extent([[0, 0], [width, height]]);
 
 				return Chart;
 			},
@@ -225,7 +210,10 @@ d3.selection.prototype.puddingChartTally = function init({
 					.call(axisY)
 					.at('transform', `translate(${FONT_SIZE * 2}, ${marginTop})`);
 
-				const axisX = d3.axisBottom(scaleX).tickFormat(d3.timeFormat('%b'));
+				const axisX = d3
+					.axisBottom(scaleX)
+					.tickFormat(d3.timeFormat('%b'))
+					.ticks(mobile ? 4 : 12);
 
 				$axis
 					.select('.axis--x')
