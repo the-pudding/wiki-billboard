@@ -47,7 +47,7 @@ const $autoplayButton = $nav.select('.btn--autoplay');
 const $speedButton = $nav.selectAll('.btn--speed');
 
 function generateRangeOfDays({ start, end }) {
-	const diff = Math.floor((end - start) / MS_DAY) + 1;
+	const diff = Math.floor((end - start) / MS_DAY) + 2;
 	let cur = start.getTime();
 	return d3.range(diff).map(i => {
 		const date = new Date(cur);
@@ -123,8 +123,7 @@ function handleChange() {
 function handleSlide(value) {
 	isSliding = true;
 	const [index] = value;
-
-	if (+index < nestedData.length - 1) {
+	if (+index < nestedData.length) {
 		currentDay = +index;
 		updateChart(true);
 	}
