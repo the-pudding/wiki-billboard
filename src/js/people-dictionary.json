@@ -3,6 +3,7 @@
     "conductor",
     "singer",
     "singer-songwriter",
+    "songwriter",
     "musician",
     "rapper",
     "trumpeter",
@@ -12,7 +13,8 @@
     "dj",
     "vocalist",
     "guitarist",
-    "music"
+    "music",
+    "operatic"
   ],
   "sports": [
     "football",
@@ -46,7 +48,8 @@
     "snooker",
     "swimmer",
     "boxer",
-    "baseball"
+    "baseball",
+    "luger"
   ],
   "entertainment": [
     "mamasita",
@@ -56,7 +59,8 @@
     "game show",
     "talk show",
     "stunt performer",
-    "illusionist"
+    "illusionist",
+    "dancer"
   ],
   "artist": ["artist"],
   "internet": ["youtuber", "social media"],
@@ -81,7 +85,8 @@
     "astronaut",
     "physician",
     "primatologist",
-    "flown in space"
+    "flown in space",
+    "chemist"
   ],
   "politics": [
     "white house",
@@ -109,7 +114,10 @@
     "mccain",
     "soldier",
     "lieutenant",
-    "admiral"
+    "admiral",
+    "federal judge",
+    "ambassador",
+    "chancellor"
   ],
   "law/crime": [
     "lawyer",
@@ -121,7 +129,8 @@
     "criminal",
     "assassination",
     "crime boss",
-    "holocaust"
+    "holocaust",
+    "murderer"
   ],
   "religion": [
     "religious",
@@ -130,7 +139,8 @@
     "pontiff",
     "archbishop",
     "spiritual",
-    "pope"
+    "pope",
+    "peoples temple"
   ],
   "business": [
     "businesswoman",
@@ -144,7 +154,8 @@
     "businessman",
     "nightclub owner",
     "chef",
-    "pawnbroker"
+    "pawnbroker",
+    "real estate developer"
   ],
   "writing": ["journalist", "author", "writer", "poet", "novelist", "essayist"]
 }
